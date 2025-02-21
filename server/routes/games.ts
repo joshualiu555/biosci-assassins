@@ -2,7 +2,7 @@ import express from "express";
 
 import {
   createGame
-} from "../controllers/game";
+} from "../controllers/games";
 
 export const gameRouter = express.Router();
 
