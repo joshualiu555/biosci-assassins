@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 
 const GameSchema = new mongoose.Schema({
-  code: {
+  gameCode: {
     type: String,
     required: true,
     unique: true
@@ -21,14 +21,14 @@ const GameSchema = new mongoose.Schema({
         type: String,
         required: true
       },
-      admin: {
+      position: {
         type: String,
         enum: ["admin", "non-admin"],
         required: true
       },
       role: {
         type: String,
-        enum: ["assassin", "crewmate"],
+        enum: ["unassigned", "assassin", "crewmate"],
         required: true
       },
       status: {

@@ -12,6 +12,19 @@ const createGame = async (req: Request, res: Response) => {
   }
 }
 
+const getPlayers = async (req: Request, res: Response) => {
+  const { gameCode } = req.query;
+
+  const game = await GameModel.findOne({ gameCode: gameCode });
+  if (!game) {
+    res.json({ error: "Game not found" });
+    return;
+  }
+
+  res.json(game.players);
+};
+
 export {
-  createGame
+  createGame,
+  getPlayers
 }

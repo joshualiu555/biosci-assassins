@@ -1,9 +1,11 @@
 import express from "express";
 
 import {
-  createGame
+  createGame,
+  getPlayers
 } from "../controllers/games";
 
-export const gameRouter = express.Router();
+export const gamesRouter = express.Router();
 
-gameRouter.post("/createGame", createGame);
+gamesRouter.post("/createGame", createGame);
+gamesRouter.get("/getPlayers", getPlayers);
