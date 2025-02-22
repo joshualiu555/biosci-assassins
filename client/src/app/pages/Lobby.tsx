@@ -2,22 +2,12 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
 import useGameStore from "../zustand/gameStore.ts";
+import {Player} from "../types.ts";
 
 const Lobby = () => {
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState<Player[]>([]);
 
   const { gameCode } = useGameStore();
-
-  useEffect(() => {
-    socket.on("addedPlayer", (player) => {
-      // TODO - Add to zustand
-      setPlayers(prevPlayers => [...prevPlayers, player]);
-    });
-
-    return () => {
-      socket.off("addedPlayer");
-    };
-  }, []);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -29,10 +19,16 @@ const Lobby = () => {
       }
     };
 
-    // TODO - Add to zustand
     fetchPlayers();
-    // add gameCode to dependency array?
-  }, []);
+
+    socket.on("addedPlayer", (player) => {
+      setPlayers(prevPlayers => [...prevPlayers, player]);
+    });
+
+    return () => {
+      socket.off("addedPlayer");
+    };
+  }, [gameCode]);
 
   return (
     <div>

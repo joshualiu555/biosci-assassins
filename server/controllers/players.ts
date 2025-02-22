@@ -21,7 +21,7 @@ const addPlayer = async (req: Request, res: Response) => {
     const sessionID = uuidv4();
     res.cookie("sessionID", sessionID, {
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
       sameSite: "strict",
       // TODO - Uncomment in production when you use https
       // secure: true

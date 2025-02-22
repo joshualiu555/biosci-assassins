@@ -4,10 +4,14 @@ import { GameModel } from "../models/Game";
 const createGame = async (req: Request, res: Response) => {
   const game = new GameModel(req.body);
 
+  console.log(game);
+
   try {
     const response = await game.save();
+    console.log(response);
     res.json(response);
   } catch (error) {
+    console.log(error);
     res.json(error);
   }
 }

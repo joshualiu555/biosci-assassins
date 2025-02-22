@@ -103,10 +103,7 @@ function Home() {
         {
           gameCode: generatedGameCode,
           player: player
-        },
-        {
-          withCredentials: true
-        }
+        }, { withCredentials: true }
       )
 
       socket.emit("addPlayer", {
