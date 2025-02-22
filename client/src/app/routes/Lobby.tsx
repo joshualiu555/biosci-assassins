@@ -36,7 +36,7 @@ const Lobby = () => {
 
   return (
     <div>
-      <p>Lobby</p>
+      <p>{gameCode}</p>
       <div>
         {players.length > 0 ? (
           players.map((player) => <p key={player.id}>{player.name}</p>)

@@ -24,7 +24,19 @@ const getPlayers = async (req: Request, res: Response) => {
   res.json(game.players);
 };
 
+const validCode = async (req: Request, res: Response) => {
+  const { gameCode } = req.query;
+
+  const game = await GameModel.findOne({ gameCode: gameCode });
+  if (game && game.status == "waiting") {
+    res.json({ result: "Valid code" });
+  } else {
+    res.json({ result: "Invalid code" });
+  }
+}
+
 export {
   createGame,
-  getPlayers
+  getPlayers,
+  validCode
 }

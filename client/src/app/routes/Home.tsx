@@ -25,15 +25,51 @@ function Home() {
 
   const navigate = useNavigate();
 
-  const handleJoinGame = () => {
+  const handleJoinGame = async () => {
     // TODO - Check player name input isn't empty
     // TODO - Check for player name duplicates
     // check if the game code exists and the game is "waiting"
-    // if it is:
-    // create a session id in a cookie, store session id in redis
-    // store player name and game code in zustand
-    // otherwise:
-    // alert
+    const response = await axios.get(`http://localhost:3000/games/validCode?gameCode=${gameCodeInput}`);
+    if (response.data.result === "Valid code") {
+      // TODO - Move duplicated code into a function
+      // if it is:
+      // create a session id in a cookie, store session id in redis
+      const player = {
+        // id will be generated on the backend
+        id: "",
+        name: nameInput,
+        position: "admin",
+        role: "unassigned",
+        status: "alive"
+      };
+
+      // add session id to a cookie and store session id - player id in redis
+      await axios.post("http://localhost:3000/players/addPlayer",
+        {
+          gameCode: gameCodeInput,
+          player: player
+        },
+        {
+          withCredentials: true
+        }
+      )
+
+      socket.emit("addPlayer", {
+        gameCode: gameCodeInput,
+        player: player
+      })
+
+      // TODO - Use persist
+      // store player name and game code in zustand
+      setPlayerName(nameInput);
+      setGameCode(gameCodeInput);
+
+      navigate("/lobby");
+    } else {
+      // otherwise:
+      // alert
+      alert("Game not found / Already started")
+    }
   };
 
   const handleCreateGame = async () => {
@@ -72,6 +108,11 @@ function Home() {
           withCredentials: true
         }
       )
+
+      socket.emit("addPlayer", {
+        gameCode: generatedGameCode,
+        player: player
+      })
 
       // TODO - Use persist
       setPlayerName(nameInput);
