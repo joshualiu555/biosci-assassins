@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { GameModel } from "../models/Game";
 import { v4 as uuidv4 } from "uuid";
-import cookieParser from "cookie-parser";
 import { redisClient } from "../index";
 
 const addPlayer = async (req: Request, res: Response) => {
@@ -27,7 +26,6 @@ const addPlayer = async (req: Request, res: Response) => {
       // secure: true
     });
 
-    // TODO - Put in index.js to avoid connecting multiple times
     await redisClient.set(sessionID, player.id);
 
     res.json({ message: "Successfully added player" });
@@ -36,6 +34,25 @@ const addPlayer = async (req: Request, res: Response) => {
   }
 }
 
+const checkPlayerExists = async (req: Request, res: Response) => {
+  const { gameCode, playerName } = req.query;
+
+  const game = await GameModel.findOne({ gameCode: gameCode });
+  if (!game) {
+    res.json({ error: "Game not found" });
+    return;
+  }
+
+  const searchPlayer = game.players.find(player => player.name === playerName);
+  // console.log(searchPlayer);
+  if (searchPlayer) {
+    res.json({ result: true });
+  } else {
+    res.json({ result: false });
+  }
+}
+
 export {
-  addPlayer
+  addPlayer,
+  checkPlayerExists
 }

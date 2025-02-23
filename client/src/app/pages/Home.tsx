@@ -25,15 +25,19 @@ function Home() {
 
   const navigate = useNavigate();
 
-  const handleJoinGame = async () => {
-    // TODO - Check player name input isn't empty
-    // TODO - Check for player name duplicates
-    // check if the game code exists and the game is "waiting"
-    const response = await axios.get(`http://localhost:3000/games/validCode?gameCode=${gameCodeInput}`);
-    if (response.data.result === "Valid code") {
-      // TODO - Move duplicated code into a function
-      // if it is:
-      // create a session id in a cookie, store session id in redis
+  const handleJoinGame = async (gameCode: string) => {
+    if (nameInput === "") {
+      alert("Name cannot be empty");
+      return;
+    }
+    const playerExists = await axios.get(`http://localhost:3000/players/checkPlayerExists?gameCode=${gameCode}&playerName=${nameInput}`);// TODO - Check for player name duplicates
+    if (playerExists.data.result === true) {
+      alert("Name already exists")
+      return;
+    }
+
+    const gameExists = await axios.get(`http://localhost:3000/games/validCode?gameCode=${gameCode}`);
+    if (gameExists.data.result === "Valid code") {
       const player = {
         // id will be generated on the backend
         id: "",
@@ -43,10 +47,9 @@ function Home() {
         status: "alive"
       };
 
-      // add session id to a cookie and store session id - player id in redis
       await axios.post("http://localhost:3000/players/addPlayer",
         {
-          gameCode: gameCodeInput,
+          gameCode: gameCode,
           player: player
         },
         {
@@ -55,70 +58,42 @@ function Home() {
       )
 
       socket.emit("addPlayer", {
-        gameCode: gameCodeInput,
+        gameCode: gameCode,
         player: player
       })
 
-      // TODO - Use persist
-      // store player name and game code in zustand
+      // TODO - Use persist or use socket connection and disconnection
       setPlayerName(nameInput);
-      setGameCode(gameCodeInput);
+      setGameCode(gameCode);
 
       navigate("/lobby");
     } else {
-      // otherwise:
-      // alert
       alert("Game not found / Already started")
     }
   };
 
   const handleCreateGame = async () => {
-    // TODO - Check player name input isn't empty
-    // TODO - Check for game code duplicates
-    try {
-      const generatedGameCode = Math.floor(1000 + Math.random() * 9000).toString();
-      const game = {
-        gameCode: generatedGameCode,
-        status: "waiting",
-        players: [],
-        numberAssassins: numberAssassins,
-        numberTasks: numberTasks,
-        timeBetweenTasks: timeBetweenTasks,
-        townhallTime: townhallTime,
-        tasksRemaining: numberTasks
-      };
-      await axios.post("http://localhost:3000/games/createGame", game);
-
-      const player = {
-        // id will be generated on the backend
-        id: "",
-        name: nameInput,
-        position: "admin",
-        role: "unassigned",
-        status: "alive"
-      };
-
-      // add session id to a cookie and store session id - player id in redis
-      await axios.post("http://localhost:3000/players/addPlayer",
-        {
-          gameCode: generatedGameCode,
-          player: player
-        }, { withCredentials: true }
-      )
-
-      socket.emit("addPlayer", {
-        gameCode: generatedGameCode,
-        player: player
-      })
-
-      // TODO - Use persist
-      setPlayerName(nameInput);
-      setGameCode(generatedGameCode);
-
-      navigate("/lobby");
-    } catch (error) {
-      console.log(error);
+    let generatedGameCode;
+    let isDuplicate = true;
+    while (isDuplicate) {
+      generatedGameCode = Math.floor(1000 + Math.random() * 9000).toString();
+      const response = await axios.get(`http://localhost:3000/games/gameExists?gameCode=${generatedGameCode}`);
+      isDuplicate = response.data.result === true;
     }
+
+    const game = {
+      gameCode: generatedGameCode,
+      status: "waiting",
+      players: [],
+      numberAssassins: numberAssassins,
+      numberTasks: numberTasks,
+      timeBetweenTasks: timeBetweenTasks,
+      townhallTime: townhallTime,
+      tasksRemaining: numberTasks
+    };
+    await axios.post("http://localhost:3000/games/createGame", game);
+
+    await handleJoinGame(generatedGameCode as string);
   };
 
   return (
@@ -139,7 +114,7 @@ function Home() {
         placeholder="Enter code"
       />
 
-      <button onClick={handleJoinGame}>
+      <button onClick={() => handleJoinGame(gameCodeInput)}>
         Join Game
       </button>
 
