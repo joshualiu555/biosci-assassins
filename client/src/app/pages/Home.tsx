@@ -30,13 +30,22 @@ function Home() {
       alert("Name cannot be empty");
       return;
     }
-    const playerExists = await axios.get(`http://localhost:3000/players/checkPlayerExists?gameCode=${gameCode}&playerName=${nameInput}`);// TODO - Check for player name duplicates
+    const playerExists = await axios.get("http://localhost:3000/players/checkPlayerExists", {
+      params: {
+        gameCode: gameCode,
+        playerName: nameInput
+      }
+    });
     if (playerExists.data.result === true) {
       alert("Name already exists")
       return;
     }
 
-    const gameExists = await axios.get(`http://localhost:3000/games/validCode?gameCode=${gameCode}`);
+    const gameExists = await axios.get("http://localhost:3000/games/validCode", {
+      params: {
+        gameCode: gameCode
+      }
+    });
     if (gameExists.data.result === "Valid code") {
       const player = {
         // id will be generated on the backend
@@ -77,7 +86,11 @@ function Home() {
     let isDuplicate = true;
     while (isDuplicate) {
       generatedGameCode = Math.floor(1000 + Math.random() * 9000).toString();
-      const response = await axios.get(`http://localhost:3000/games/gameExists?gameCode=${generatedGameCode}`);
+      const response = await axios.get("http://localhost:3000/games/gameExists", {
+        params: {
+          gameCode: generatedGameCode
+        }
+      });
       isDuplicate = response.data.result === true;
     }
 

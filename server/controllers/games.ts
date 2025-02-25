@@ -8,6 +8,10 @@ const createGame = async (req: Request, res: Response) => {
   res.json(response);
 }
 
+const removeGame = async (req: Request, res: Response) => {
+
+}
+
 const gameExists = async (req: Request, res: Response) => {
   const { gameCode } = req.query;
   const game = await GameModel.findOne({ gameCode: gameCode });
@@ -43,6 +47,7 @@ const validCode = async (req: Request, res: Response) => {
 
 export {
   createGame,
+  removeGame,
   gameExists,
   getPlayers,
   validCode

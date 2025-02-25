@@ -34,6 +34,37 @@ const addPlayer = async (req: Request, res: Response) => {
   }
 }
 
+const removePlayer = async (req: Request, res: Response) => {
+  const { gameCode } = req.query;
+  const playerID = await redisClient.get(req.cookies["sessionID"]);
+
+  const game = await GameModel.findOne({ gameCode: gameCode });
+  if (!game) {
+    res.json({ error: "Game not found" });
+    return;
+  }
+
+  if (game.players.length === 1) {
+    // remove game
+  } else {
+    const searchPlayer = game.players.find(player => player.id === playerID);
+    if (!searchPlayer) {
+      res.json({ error: "Player not found" });
+      return;
+    }
+    if (searchPlayer.position === "admin") {
+      // turn the next player into admin
+    }
+  }
+
+  game.players.pull({ id: playerID });
+  await game.save();
+  await redisClient.del(req.cookies["sessionID"]);
+  res.clearCookie("sessionID");
+
+  res.end();
+}
+
 const checkPlayerExists = async (req: Request, res: Response) => {
   const { gameCode, playerName } = req.query;
 
@@ -44,7 +75,6 @@ const checkPlayerExists = async (req: Request, res: Response) => {
   }
 
   const searchPlayer = game.players.find(player => player.name === playerName);
-  // console.log(searchPlayer);
   if (searchPlayer) {
     res.json({ result: true });
   } else {
@@ -54,5 +84,6 @@ const checkPlayerExists = async (req: Request, res: Response) => {
 
 export {
   addPlayer,
+  removePlayer,
   checkPlayerExists
 }

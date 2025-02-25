@@ -12,7 +12,11 @@ const Lobby = () => {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/games/getPlayers?gameCode=${gameCode}`);
+        const response = await axios.get("http://localhost:3000/games/getPlayers", {
+          params: {
+            gameCode: gameCode
+          }
+        });
         setPlayers(response.data);
       } catch (error) {
         console.error(error);
@@ -25,10 +29,22 @@ const Lobby = () => {
       setPlayers(prevPlayers => [...prevPlayers, player]);
     });
 
+    window.addEventListener("popstate", handleBackButton, true);
+
     return () => {
       socket.off("addedPlayer");
+      window.removeEventListener("popstate", handleBackButton, true);
     };
-  }, [gameCode]);
+  }, []);
+
+  const handleBackButton = async () => {
+    await axios.delete("http://localhost:3000/players/removePlayer", {
+      params: {
+        gameCode: gameCode
+      },
+      withCredentials: true
+    })
+  };
 
   return (
     <div>
