@@ -2,11 +2,12 @@ import { Request, Response } from "express";
 import { GameModel } from "../models/Game";
 import { v4 as uuidv4 } from "uuid";
 import { redisClient } from "../index";
+import { removeGame } from "./games";
 
 const addPlayer = async (req: Request, res: Response) => {
   const { gameCode, player } = req.body;
 
-  player.id = uuidv4();
+  player.playerID = uuidv4();
 
   try {
     const game = await GameModel.findOne({ gameCode: gameCode });
@@ -26,7 +27,7 @@ const addPlayer = async (req: Request, res: Response) => {
       // secure: true
     });
 
-    await redisClient.set(sessionID, player.id);
+    await redisClient.set(sessionID, player.playerID);
 
     res.json({ message: "Successfully added player" });
   } catch (error) {
@@ -44,25 +45,25 @@ const removePlayer = async (req: Request, res: Response) => {
     return;
   }
 
-  if (game.players.length === 1) {
-    // remove game
-  } else {
-    const searchPlayer = game.players.find(player => player.id === playerID);
-    if (!searchPlayer) {
-      res.json({ error: "Player not found" });
-      return;
-    }
-    if (searchPlayer.position === "admin") {
-      // turn the next player into admin
-    }
-  }
-
   game.players.pull({ id: playerID });
   await game.save();
   await redisClient.del(req.cookies["sessionID"]);
   res.clearCookie("sessionID");
-
   res.end();
+
+  if (game.players.length === 1) {
+    await removeGame(gameCode as string);
+    return;
+  }
+
+  const searchPlayerIndex = game.players.findIndex(player => player.id === playerID);
+  if (searchPlayerIndex === -1) {
+    res.json({ error: "Player not found" });
+    return;
+  }
+  if (game.players[searchPlayerIndex].position === "admin") {
+    game.players[searchPlayerIndex + 1].position = "admin";
+  }
 }
 
 const checkPlayerExists = async (req: Request, res: Response) => {

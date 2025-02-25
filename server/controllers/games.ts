@@ -8,8 +8,8 @@ const createGame = async (req: Request, res: Response) => {
   res.json(response);
 }
 
-const removeGame = async (req: Request, res: Response) => {
-
+const removeGame = async (gameCode: string) => {
+  await GameModel.deleteOne({ gameCode: gameCode });
 }
 
 const gameExists = async (req: Request, res: Response) => {

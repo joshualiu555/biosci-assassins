@@ -49,7 +49,7 @@ function Home() {
     if (gameExists.data.result === "Valid code") {
       const player = {
         // id will be generated on the backend
-        id: "",
+        playerID: "",
         name: nameInput,
         position: "admin",
         role: "unassigned",

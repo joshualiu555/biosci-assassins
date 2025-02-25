@@ -23,7 +23,13 @@ const Lobby = () => {
       }
     };
 
-    fetchPlayers();
+    fetchPlayers()
+      .then(() => {
+        console.log("Players fetched");
+      })
+      .catch(() => {
+        console.log("Failed to fetch players");
+      })
 
     socket.on("addedPlayer", (player) => {
       setPlayers(prevPlayers => [...prevPlayers, player]);
@@ -51,7 +57,7 @@ const Lobby = () => {
       <p>{gameCode}</p>
       <div>
         {players.length > 0 ? (
-          players.map((player) => <p key={player.id}>{player.name}</p>)
+          players.map((player) => <p key={player.playerID}>{player.name}</p>)
         ) : (
           <p>No players yet...</p>
         )}

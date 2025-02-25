@@ -1,5 +1,5 @@
 export interface Player {
-  id: string,
+  playerID: string,
   name: string,
   position: "admin" | "non-admin",
   role: "unassigned" | "assassin" | "crewmate",

@@ -13,7 +13,7 @@ const GameSchema = new mongoose.Schema({
   },
   players: [
     {
-      id: {
+      playerID: {
         type: String,
         required: true
       },
