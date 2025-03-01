@@ -56,5 +56,11 @@ mongoose
   });
 
 const redisClient = createClient();
-redisClient.connect();
+redisClient.connect()
+  .then(() => {
+    console.log("Redis connected");
+  })
+  .catch(() => {
+    console.log("Failed to connect Redis");
+  })
 export { redisClient };

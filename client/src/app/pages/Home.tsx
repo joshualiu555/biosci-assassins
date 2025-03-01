@@ -56,7 +56,7 @@ function Home() {
         status: "alive"
       };
 
-      await axios.post("http://localhost:3000/players/addPlayer",
+      const response = await axios.post("http://localhost:3000/players/addPlayer",
         {
           gameCode: gameCode,
           player: player
@@ -66,14 +66,14 @@ function Home() {
         }
       )
 
-      socket.emit("addPlayer", {
-        gameCode: gameCode,
-        player: player
-      })
-
       // TODO - Use persist or use socket connection and disconnection
       setPlayerName(nameInput);
       setGameCode(gameCode);
+
+      socket.emit("addPlayer", {
+        gameCode: gameCode,
+        player: response.data.player
+      })
 
       navigate("/lobby");
     } else {

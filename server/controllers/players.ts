@@ -29,9 +29,9 @@ const addPlayer = async (req: Request, res: Response) => {
 
     await redisClient.set(sessionID, player.playerID);
 
-    res.json({ message: "Successfully added player" });
+    res.json({ player: player });
   } catch (error) {
-    res.json(error);
+    res.json({ error: "Failed to add player" });
   }
 }
 
@@ -45,25 +45,11 @@ const removePlayer = async (req: Request, res: Response) => {
     return;
   }
 
-  game.players.pull({ id: playerID });
+  game.players.pull({ playerID: playerID });
   await game.save();
   await redisClient.del(req.cookies["sessionID"]);
   res.clearCookie("sessionID");
   res.end();
-
-  if (game.players.length === 1) {
-    await removeGame(gameCode as string);
-    return;
-  }
-
-  const searchPlayerIndex = game.players.findIndex(player => player.id === playerID);
-  if (searchPlayerIndex === -1) {
-    res.json({ error: "Player not found" });
-    return;
-  }
-  if (game.players[searchPlayerIndex].position === "admin") {
-    game.players[searchPlayerIndex + 1].position = "admin";
-  }
 }
 
 const checkPlayerExists = async (req: Request, res: Response) => {

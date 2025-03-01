@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
 import useGameStore from "../zustand/gameStore.ts";
-import {Player} from "../types.ts";
+import { Player } from "../types.ts";
 
 const Lobby = () => {
   const [players, setPlayers] = useState<Player[]>([]);
-
   const { gameCode } = useGameStore();
 
   useEffect(() => {
@@ -14,8 +13,8 @@ const Lobby = () => {
       try {
         const response = await axios.get("http://localhost:3000/games/getPlayers", {
           params: {
-            gameCode: gameCode
-          }
+            gameCode: gameCode,
+          },
         });
         setPlayers(response.data);
       } catch (error) {
@@ -23,33 +22,49 @@ const Lobby = () => {
       }
     };
 
+    // Fetch players initially
     fetchPlayers()
       .then(() => {
         console.log("Players fetched");
       })
       .catch(() => {
         console.log("Failed to fetch players");
-      })
+      });
 
+    // Handle added and removed players through socket events
     socket.on("addedPlayer", (player) => {
-      setPlayers(prevPlayers => [...prevPlayers, player]);
+      console.log("Added player");
+      setPlayers((prevPlayers) => [...prevPlayers, player]);
     });
 
-    window.addEventListener("popstate", handleBackButton, true);
+    socket.on("removedPlayer", (player) => {
+      console.log("Removed player");
+      setPlayers((prevPlayers) =>
+        prevPlayers.filter((searchPlayer) => searchPlayer.playerID !== player.playerID)
+      );
+    });
+
+    window.addEventListener("popstate", handleBackButton);
 
     return () => {
       socket.off("addedPlayer");
-      window.removeEventListener("popstate", handleBackButton, true);
+      socket.off("removedPlayer");
+      setTimeout(() => {
+        window.removeEventListener("popstate", handleBackButton);
+      }, 0);
     };
   }, []);
 
   const handleBackButton = async () => {
+    console.log("Back button");
+    socket.emit("removePlayer");
+
     await axios.delete("http://localhost:3000/players/removePlayer", {
       params: {
-        gameCode: gameCode
+        gameCode: gameCode,
       },
-      withCredentials: true
-    })
+      withCredentials: true,
+    });
   };
 
   return (
