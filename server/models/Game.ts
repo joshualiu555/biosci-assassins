@@ -38,7 +38,7 @@ const GameSchema = new mongoose.Schema({
       },
     },
   ],
-  // TODO - Add locations
+  locations: [],
   numberAssassins: {
     type: Number,
     required: true

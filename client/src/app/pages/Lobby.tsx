@@ -22,7 +22,6 @@ const Lobby = () => {
       }
     };
 
-    // Fetch players initially
     fetchPlayers()
       .then(() => {
         console.log("Players fetched");
@@ -31,14 +30,12 @@ const Lobby = () => {
         console.log("Failed to fetch players");
       });
 
-    // Handle added and removed players through socket events
     socket.on("addedPlayer", (player) => {
       console.log("Added player");
       setPlayers((prevPlayers) => [...prevPlayers, player]);
     });
 
     socket.on("removedPlayer", (player) => {
-      console.log("Removed player");
       setPlayers((prevPlayers) =>
         prevPlayers.filter((searchPlayer) => searchPlayer.playerID !== player.playerID)
       );
@@ -56,7 +53,6 @@ const Lobby = () => {
   }, []);
 
   const handleBackButton = async () => {
-    console.log("Back button");
     socket.emit("removePlayer");
 
     await axios.delete("http://localhost:3000/players/removePlayer", {

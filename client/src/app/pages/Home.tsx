@@ -6,12 +6,14 @@ import { useNavigate } from "react-router-dom";
 import socket from "../socket-io.ts";
 
 function Home() {
-  const [nameInput, setNameInput] = useState('');
-  const [gameCodeInput, setGameCodeInput] = useState('');
-  const [numberAssassins, setNumberAssassins] = useState(1);
-  const [numberTasks, setNumberTasks] = useState(5);
-  const [timeBetweenTasks, setTimeBetweenTasks] = useState(1);
-  const [townhallTime, setTownhallTime] = useState(1);
+  const [nameInput, setNameInput] = useState("");
+  const [gameCodeInput, setGameCodeInput] = useState("");
+  const [numberAssassins, setNumberAssassins] = useState(0);
+  const [numberTasks, setNumberTasks] = useState(0);
+  const [timeBetweenTasks, setTimeBetweenTasks] = useState(0);
+  const [townhallTime, setTownhallTime] = useState(0);
+  const [numberLocations, setNumberLocations] = useState(0);
+  const [locationInputs, setLocationInputs] = useState<string[]>([]);
 
   const handleNameInputChange = (e: React.ChangeEvent<HTMLInputElement>) => setNameInput(e.target.value);
   const handleGameCodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => setGameCodeInput(e.target.value);
@@ -19,13 +21,29 @@ function Home() {
   const handleTasksChange = (e: React.ChangeEvent<HTMLInputElement>) => setNumberTasks(Number(e.target.value));
   const handleTimeBetweenTasksChange = (e: React.ChangeEvent<HTMLInputElement>) => setTimeBetweenTasks(Number(e.target.value));
   const handleTownhallTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => setTownhallTime(Number(e.target.value));
+  const handleLocationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newNumberLocations = Number(e.target.value);
+    setNumberLocations(newNumberLocations);
+    if (newNumberLocations > numberLocations) {
+      for (let i = 0; i < newNumberLocations - numberLocations; i++) {
+        locationInputs.push("");
+      }
+    } else {
+      locationInputs.length = newNumberLocations;
+    }
+  };
+  const handleLocationsInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const updatedLocationInputs = [...locationInputs];
+    updatedLocationInputs[index] = e.target.value;
+    setLocationInputs(updatedLocationInputs);
+  }
 
   const { setPlayerName } = usePlayerStore();
   const { setGameCode } = useGameStore();
 
   const navigate = useNavigate();
 
-  const handleJoinGame = async (gameCode: string) => {
+  const handleJoinGame = async (gameCode: string, position: string) => {
     if (nameInput === "") {
       alert("Name cannot be empty");
       return;
@@ -51,7 +69,7 @@ function Home() {
         // id will be generated on the backend
         playerID: "",
         name: nameInput,
-        position: "admin",
+        position: position,
         role: "unassigned",
         status: "alive"
       };
@@ -98,6 +116,7 @@ function Home() {
       gameCode: generatedGameCode,
       status: "waiting",
       players: [],
+      locations: locationInputs,
       numberAssassins: numberAssassins,
       numberTasks: numberTasks,
       timeBetweenTasks: timeBetweenTasks,
@@ -106,7 +125,7 @@ function Home() {
     };
     await axios.post("http://localhost:3000/games/createGame", game);
 
-    await handleJoinGame(generatedGameCode as string);
+    await handleJoinGame(generatedGameCode as string, "non-admin");
   };
 
   return (
@@ -122,51 +141,66 @@ function Home() {
       <p>Code:</p>
       <input
         type="text"
+        inputMode="numeric"
         value={gameCodeInput}
         onChange={handleGameCodeInputChange}
         placeholder="Enter code"
       />
 
-      <button onClick={() => handleJoinGame(gameCodeInput)}>
+      <button onClick={() => handleJoinGame(gameCodeInput, "admin")}>
         Join Game
       </button>
 
       <p>Number of Assassins:</p>
       <input
-        type="number"
+        type="text"
+        inputMode="numeric"
         value={numberAssassins}
         onChange={handleAssassinsChange}
-        min="1"
-        max="5"
       />
 
       <p>Number of Tasks:</p>
       <input
-        type="number"
+        type="text"
+        inputMode="numeric"
         value={numberTasks}
         onChange={handleTasksChange}
-        min="5"
-        max="100"
-        step="5"
       />
 
       <p>Time Between Tasks: {timeBetweenTasks} minutes</p>
       <input
-        type="number"
+        type="text"
+        inputMode="numeric"
         value={timeBetweenTasks}
         onChange={handleTimeBetweenTasksChange}
-        min="1"
-        max="5"
       />
 
       <p>Townhall Time: {townhallTime} minutes</p>
       <input
-        type="number"
+        type="text"
+        inputMode="numeric"
         value={townhallTime}
         onChange={handleTownhallTimeChange}
-        min="1"
-        max="5"
       />
+
+      <p>Number Locations: {numberLocations}</p>
+      <input
+        type="text"
+        inputMode="numeric"
+        value={numberLocations}
+        onChange={handleLocationsChange}
+      />
+
+      {locationInputs.map((input, index) => (
+        <div key={index}>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => handleLocationsInputChange(index, e)}
+            placeholder={`Location ${index + 1}`}
+          />
+        </div>
+      ))}
 
       <button onClick={handleCreateGame}>
         Create Game
