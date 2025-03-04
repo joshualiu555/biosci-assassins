@@ -2,8 +2,6 @@ import {Request, Response} from "express";
 import {GameModel} from "../models/Game";
 
 const createGame = async (req: Request, res: Response) => {
-  console.log(req.body);
-
   const game = new GameModel(req.body);
 
   const response = await game.save();

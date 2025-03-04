@@ -47,6 +47,16 @@ const removePlayer = async (req: Request, res: Response) => {
 
   game.players.pull({ playerID: playerID });
   await game.save();
+
+  const updatedGame = await GameModel.findOne({ gameCode: gameCode });
+  if (!updatedGame) {
+    res.json({ error: "Game not found" });
+    return;
+  }
+  if (updatedGame.players.length === 0) {
+    await removeGame(gameCode as string);
+  }
+
   await redisClient.del(req.cookies["sessionID"]);
   res.clearCookie("sessionID");
   res.end();

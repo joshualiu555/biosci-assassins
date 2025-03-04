@@ -100,6 +100,18 @@ function Home() {
   };
 
   const handleCreateGame = async () => {
+    if (numberLocations < 1) {
+      alert("Must have at least 1 location");
+      return;
+    }
+
+    for (const location of locationInputs) {
+      if (location === "") {
+        alert("Locations cannot be empty");
+        return;
+      }
+    }
+
     let generatedGameCode;
     let isDuplicate = true;
     while (isDuplicate) {

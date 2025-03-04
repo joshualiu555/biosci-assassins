@@ -31,7 +31,6 @@ const Lobby = () => {
       });
 
     socket.on("addedPlayer", (player) => {
-      console.log("Added player");
       setPlayers((prevPlayers) => [...prevPlayers, player]);
     });
 
