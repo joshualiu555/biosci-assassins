@@ -84,7 +84,6 @@ function Home() {
         }
       )
 
-      // TODO - Use persist or use socket connection and disconnection
       setPlayerName(nameInput);
       setGameCode(gameCode);
 
