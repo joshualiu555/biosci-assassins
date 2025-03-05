@@ -1,22 +1,32 @@
 import { create } from "zustand";
-import {persist} from "zustand/middleware";
+import { Player } from "../types";
 
 interface GameStore {
-  gameCode: string;
+  gameCode: string
+  status: string
+  players: Player[]
+  locations: string[]
+  numberAssassins: number
+  numberTasks: number
+  timeBetweenTasks: number
+  townhallTime: number
+  tasksRemaining: number
 
-  setGameCode: (gameCode: string) => void;
+  setGameState: (updates: Partial<GameStore>) => void;
 }
 
-const useGameStore = create<GameStore>()(
-  persist(
-    (set) => ({
-      gameCode: "",
-      setGameCode: (gameCode: string) => set({ gameCode }),
-    }),
-    {
-      name: "game-code-storage",
-    }
-  )
-);
+const useGameStore = create<GameStore>((set) => ({
+  gameCode: "",
+  status: "waiting",
+  players: [],
+  locations: [],
+  numberAssassins: 0,
+  numberTasks: 0,
+  timeBetweenTasks: 0,
+  townhallTime: 0,
+  tasksRemaining: 0,
+
+  setGameState: (updates) => set(updates),
+}));
 
 export default useGameStore;

@@ -1,22 +1,23 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 interface PlayerStore {
-  playerName: string;
+  playerID: string
+  name: string
+  position: string
+  role: string
+  status: string
 
-  setPlayerName: (playerName: string) => void;
+  setPlayerState: (updates: Partial<PlayerStore>) => void;
 }
 
-const usePlayerStore = create<PlayerStore>()(
-  persist(
-    (set) => ({
-      playerName: "",
-      setPlayerName: (playerName: string) => set({ playerName }),
-    }),
-    {
-      name: "player-name-storage",
-    }
-  )
-);
+const usePlayerStore = create<PlayerStore>((set) => ({
+  playerID: "",
+  name: "",
+  position: "",
+  role: "unassigned",
+  status: "alive",
+
+  setPlayerState: (updates) => set(updates),
+}));
 
 export default usePlayerStore;

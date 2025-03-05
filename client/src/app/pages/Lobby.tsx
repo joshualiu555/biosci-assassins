@@ -2,11 +2,16 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
 import { Player, Game } from "../types.ts";
+import useGameStore from "../zustand/gameStore.ts";
+import usePlayerStore from "../zustand/playerStore.ts";
 
 const Lobby = () => {
   const [game, setGame] = useState<Game>();
   const [player, setPlayer] = useState<Player>();
   const [players, setPlayers] = useState<Player[]>([]);
+
+  const { setGameState, gameCode, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
+  const { setPlayerState } = usePlayerStore();
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -14,6 +19,7 @@ const Lobby = () => {
         const response = await axios.get("http://localhost:3000/games/getGame", {
           withCredentials: true
         });
+        setGameState(response.data);
         setGame(response.data);
       } catch (error) {
         console.error("Failed to fetch game: ", error);
@@ -36,11 +42,12 @@ const Lobby = () => {
       try {
         const response = await axios.get("http://localhost:3000/players/getPlayers", {
           params: {
-            gameCode: game.gameCode
+            gameCode: gameCode
           },
           withCredentials: true
         });
-        // setPlayer(response.data.player);
+        setPlayer(response.data.player);
+        setPlayerState(response.data.player);
         setPlayers(response.data.players);
       } catch (error) {
         console.error("Failed to fetch players: ", error);
@@ -89,7 +96,7 @@ const Lobby = () => {
 
     await axios.delete("http://localhost:3000/players/removePlayer", {
       params: {
-        gameCode: game.gameCode
+        gameCode: gameCode
       },
       withCredentials: true,
     });
@@ -97,15 +104,28 @@ const Lobby = () => {
 
   return (
     <div>
+      {game ?
+        <div>
+          {/* TODO - Fetch from Zustand state */}
+          <p>Game code: {gameCode}</p>
+          <p>Number assassins: {numberAssassins}</p>
+          <p>Number tasks: {numberTasks}</p>
+          <p>Time between tasks: {timeBetweenTasks} minutes</p>
+          <p>Townhall time: {townhallTime} minutes</p>
+          <h3>Locations:</h3>
+          {locations.length > 0 ?
+            locations.map((location, index) => <p key={index}>{location}</p>)
+            :
+            <p>No locations yet...</p>
+          }
+        </div>
+        :
+        <p>Game has not loaded yet...</p>
+      }
       <div>
-        {game?.gameCode ?
-          <p>{game.gameCode}</p>
-          :
-          <p>No game code yet...</p>}
-      </div>
-      <div>
+        <h3>Players:</h3>
         {players.length > 0 ?
-          players.map((player) => <p key={player.playerID}>{player.name}</p>)
+          players.map(player => <p key={player.playerID}>{player.name}</p>)
           :
           <p>No players yet...</p>
         }

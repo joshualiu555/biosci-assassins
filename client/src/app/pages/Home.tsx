@@ -38,8 +38,8 @@ function Home() {
     setLocationInputs(updatedLocationInputs);
   }
 
-  const { setPlayerName } = usePlayerStore();
-  const { setGameCode } = useGameStore();
+  const { setPlayerState } = usePlayerStore();
+  const { setGameState } = useGameStore();
 
   const navigate = useNavigate();
 
@@ -84,8 +84,7 @@ function Home() {
         }
       )
 
-      setPlayerName(nameInput);
-      setGameCode(gameCode);
+      setPlayerState(player);
 
       socket.emit("addPlayer", {
         gameCode: gameCode,
@@ -135,6 +134,8 @@ function Home() {
       tasksRemaining: numberTasks
     };
     await axios.post("http://localhost:3000/games/createGame", game);
+
+    setGameState(game);
 
     await handleJoinGame(generatedGameCode as string, "admin");
   };
