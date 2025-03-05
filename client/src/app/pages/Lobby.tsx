@@ -1,24 +1,49 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
-import useGameStore from "../zustand/gameStore.ts";
-import { Player } from "../types.ts";
+import { Player, Game } from "../types.ts";
 
 const Lobby = () => {
+  const [game, setGame] = useState<Game>();
+  const [player, setPlayer] = useState<Player>();
   const [players, setPlayers] = useState<Player[]>([]);
-  const { gameCode } = useGameStore();
 
   useEffect(() => {
+    const fetchGame = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/games/getGame", {
+          withCredentials: true
+        });
+        setGame(response.data);
+      } catch (error) {
+        console.error("Failed to fetch game: ", error);
+      }
+    };
+
+    fetchGame()
+      .then(() => {
+        console.log("Game fetched");
+      })
+      .catch(() => {
+        console.error("Failed to fetch game");
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!game) return;
+
     const fetchPlayers = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/games/getPlayers", {
+        const response = await axios.get("http://localhost:3000/players/getPlayers", {
           params: {
-            gameCode: gameCode,
+            gameCode: game.gameCode
           },
+          withCredentials: true
         });
-        setPlayers(response.data);
+        // setPlayer(response.data.player);
+        setPlayers(response.data.players);
       } catch (error) {
-        console.error(error);
+        console.error("Failed to fetch players: ", error);
       }
     };
 
@@ -27,9 +52,11 @@ const Lobby = () => {
         console.log("Players fetched");
       })
       .catch(() => {
-        console.log("Failed to fetch players");
+        console.error("Failed to fetch players");
       });
+  }, [game]);
 
+  useEffect(() => {
     socket.on("addedPlayer", (player) => {
       setPlayers((prevPlayers) => [...prevPlayers, player]);
     });
@@ -40,23 +67,29 @@ const Lobby = () => {
       );
     });
 
-    window.addEventListener("popstate", handleBackButton);
-
     return () => {
       socket.off("addedPlayer");
       socket.off("removedPlayer");
+    };
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("popstate", handleBackButton);
+    return () => {
       setTimeout(() => {
         window.removeEventListener("popstate", handleBackButton);
       }, 0);
     };
-  }, []);
+  }, [game]);
 
   const handleBackButton = async () => {
+    if (!game) return;
+
     socket.emit("removePlayer");
 
     await axios.delete("http://localhost:3000/players/removePlayer", {
       params: {
-        gameCode: gameCode,
+        gameCode: game.gameCode
       },
       withCredentials: true,
     });
@@ -64,13 +97,18 @@ const Lobby = () => {
 
   return (
     <div>
-      <p>{gameCode}</p>
       <div>
-        {players.length > 0 ? (
+        {game?.gameCode ?
+          <p>{game.gameCode}</p>
+          :
+          <p>No game code yet...</p>}
+      </div>
+      <div>
+        {players.length > 0 ?
           players.map((player) => <p key={player.playerID}>{player.name}</p>)
-        ) : (
+          :
           <p>No players yet...</p>
-        )}
+        }
       </div>
     </div>
   );

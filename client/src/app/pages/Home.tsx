@@ -136,7 +136,7 @@ function Home() {
     };
     await axios.post("http://localhost:3000/games/createGame", game);
 
-    await handleJoinGame(generatedGameCode as string, "non-admin");
+    await handleJoinGame(generatedGameCode as string, "admin");
   };
 
   return (
@@ -158,7 +158,7 @@ function Home() {
         placeholder="Enter code"
       />
 
-      <button onClick={() => handleJoinGame(gameCodeInput, "admin")}>
+      <button onClick={() => handleJoinGame(gameCodeInput, "non-admin")}>
         Join Game
       </button>
 
