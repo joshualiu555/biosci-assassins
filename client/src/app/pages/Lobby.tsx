@@ -102,11 +102,14 @@ const Lobby = () => {
     });
   };
 
+  const handleStartGame = () => {
+
+  }
+
   return (
     <div>
       {game ?
         <div>
-          {/* TODO - Fetch from Zustand state */}
           <p>Game code: {gameCode}</p>
           <p>Number assassins: {numberAssassins}</p>
           <p>Number tasks: {numberTasks}</p>
@@ -129,6 +132,20 @@ const Lobby = () => {
           :
           <p>No players yet...</p>
         }
+      </div>
+      <div>
+        {player ? (
+          player.position === "admin" ? (
+            <button onClick={handleStartGame}>
+              Start Game
+            </button>
+          ) : (
+            <p>Waiting for admin to start game</p>
+          )
+        ) : (
+          <p>No player yet</p>
+        )}
+
       </div>
     </div>
   );
