@@ -75,12 +75,12 @@ const removePlayer = async (req: Request, res: Response) => {
     await removeGame(gameCode as string);
   }
 
-  const index = updatedGame.players.findIndex(player => player.position === "admin");
-  if (index === -1) {
-    updatedGame.players[0].position = "admin";
-    // TODO - Use socket layer to emit
-    await game.save();
-  }
+  // const index = updatedGame.players.findIndex(player => player.position === "admin");
+  // if (index === -1) {
+  //   updatedGame.players[0].position = "admin";
+  //   // TODO - Use socket layer to emit
+  //   await game.save();
+  // }
 
   await redisClient.del(req.cookies["sessionID"]);
   res.clearCookie("sessionID");

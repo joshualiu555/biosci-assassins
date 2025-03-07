@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import usePlayerStore from "../zustand/playerStore.ts";
-import useGameStore from "../zustand/gameStore.ts";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import socket from "../socket-io.ts";
@@ -39,11 +38,10 @@ function Home() {
   }
 
   const { setPlayerState } = usePlayerStore();
-  const { setGameState } = useGameStore();
 
   const navigate = useNavigate();
 
-  const handleJoinGame = async (gameCode: string, position: string) => {
+  const handleJoinGame = async (gameCode: string, playerPosition: string) => {
     if (nameInput === "") {
       alert("Name cannot be empty");
       return;
@@ -69,7 +67,7 @@ function Home() {
         // id will be generated on the backend
         playerID: "",
         name: nameInput,
-        position: position,
+        position: playerPosition,
         role: "unassigned",
         status: "alive"
       };
@@ -84,7 +82,7 @@ function Home() {
         }
       )
 
-      setPlayerState(player);
+      setPlayerState(response.data.player);
 
       socket.emit("addPlayer", {
         gameCode: gameCode,
@@ -134,8 +132,6 @@ function Home() {
       tasksRemaining: numberTasks
     };
     await axios.post("http://localhost:3000/games/createGame", game);
-
-    setGameState(game);
 
     await handleJoinGame(generatedGameCode as string, "admin");
   };
