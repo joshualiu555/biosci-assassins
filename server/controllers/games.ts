@@ -3,11 +3,13 @@ import { GameModel } from "../models/Game";
 import { redisClient } from "../index";
 
 const getGame = async (req: Request, res: Response) => {
-  const playerID = await redisClient.get(req.cookies["sessionID"]);
-
-  const game = await GameModel.findOne({ "players.playerID": playerID });
-
-  res.json(game);
+  try {
+    const playerID = await redisClient.get(req.cookies["sessionID"]);
+    const game = await GameModel.findOne({ "players.playerID": playerID });
+    res.json(game);
+  } catch (error) {
+    res.json(error);
+  }
 }
 
 const createGame = async (req: Request, res: Response) => {

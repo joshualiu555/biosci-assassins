@@ -5,8 +5,8 @@ import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
 
 const Lobby = () => {
-  const { setGameState, gameCode, players, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
-  const { setPlayerState, position } = usePlayerStore();
+  const { setGameState, resetGameState, gameCode, players, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
+  const { setPlayerState, resetPlayerState, position } = usePlayerStore();
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -52,6 +52,9 @@ const Lobby = () => {
       },
       withCredentials: true,
     });
+
+    resetGameState();
+    resetPlayerState();
   };
 
   const handleStartGame = () => {

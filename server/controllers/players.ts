@@ -54,37 +54,41 @@ const addPlayer = async (req: Request, res: Response) => {
 }
 
 const removePlayer = async (req: Request, res: Response) => {
-  const { gameCode } = req.query;
-  const playerID = await redisClient.get(req.cookies["sessionID"]);
+  try {
+    const { gameCode } = req.query;
+    const playerID = await redisClient.get(req.cookies["sessionID"]);
 
-  const game = await GameModel.findOne({ gameCode: gameCode });
-  if (!game) {
-    res.json({ error: "Game not found" });
-    return;
+    const game = await GameModel.findOne({ gameCode: gameCode });
+    if (!game) {
+      res.json({ error: "Game not found" });
+      return;
+    }
+
+    game.players.pull({ playerID: playerID });
+    await game.save();
+
+    const updatedGame = await GameModel.findOne({ gameCode: gameCode });
+    if (!updatedGame) {
+      res.json({ error: "Game not found" });
+      return;
+    }
+    if (updatedGame.players.length === 0) {
+      await removeGame(gameCode as string);
+    }
+
+    // const index = updatedGame.players.findIndex(player => player.position === "admin");
+    // if (index === -1) {
+    //   updatedGame.players[0].position = "admin";
+    //   // TODO - Use socket layer to emit
+    //   await game.save();
+    // }
+
+    await redisClient.del(req.cookies["sessionID"]);
+    res.clearCookie("sessionID");
+    res.end();
+  } catch (error) {
+    res.json(error);
   }
-
-  game.players.pull({ playerID: playerID });
-  await game.save();
-
-  const updatedGame = await GameModel.findOne({ gameCode: gameCode });
-  if (!updatedGame) {
-    res.json({ error: "Game not found" });
-    return;
-  }
-  if (updatedGame.players.length === 0) {
-    await removeGame(gameCode as string);
-  }
-
-  // const index = updatedGame.players.findIndex(player => player.position === "admin");
-  // if (index === -1) {
-  //   updatedGame.players[0].position = "admin";
-  //   // TODO - Use socket layer to emit
-  //   await game.save();
-  // }
-
-  await redisClient.del(req.cookies["sessionID"]);
-  res.clearCookie("sessionID");
-  res.end();
 }
 
 const checkPlayerExists = async (req: Request, res: Response) => {

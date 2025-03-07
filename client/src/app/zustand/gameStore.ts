@@ -13,9 +13,10 @@ interface GameStore {
   tasksRemaining: number
 
   setGameState: (updates: Partial<GameStore>) => void;
+  resetGameState: () => void;
 }
 
-const useGameStore = create<GameStore>((set) => ({
+const initialGameState = {
   gameCode: "",
   status: "waiting",
   players: [],
@@ -25,8 +26,13 @@ const useGameStore = create<GameStore>((set) => ({
   timeBetweenTasks: 0,
   townhallTime: 0,
   tasksRemaining: 0,
+};
+
+const useGameStore = create<GameStore>((set) => ({
+  ...initialGameState,
 
   setGameState: (updates) => set(updates),
+  resetGameState: () => set(() => ({ ...initialGameState })),
 }));
 
 export default useGameStore;
