@@ -12,6 +12,10 @@ const registerPlayersSocket = (io: Server, socket: Socket) => {
     socket.to(socket.data.gameCode).emit("removedPlayer", socket.data.player);
     socket.leave(socket.data.gameCode);
   })
+
+  socket.on("switchAdmin", (updatedPlayers) => {
+    socket.to(socket.data.gameCode).emit("switchedAdmin", updatedPlayers);
+  })
 }
 
 export default registerPlayersSocket;

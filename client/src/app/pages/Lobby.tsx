@@ -6,7 +6,7 @@ import usePlayerStore from "../zustand/playerStore.ts";
 
 const Lobby = () => {
   const { setGameState, resetGameState, gameCode, players, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
-  const { setPlayerState, resetPlayerState, position } = usePlayerStore();
+  const { setPlayerState, resetPlayerState, playerID, position } = usePlayerStore();
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -32,6 +32,19 @@ const Lobby = () => {
       setGameState({ players: useGameStore.getState().players.filter(searchPlayer => searchPlayer.playerID !== player.playerID) });
     });
 
+    socket.on("switchedAdmin", (updatedPlayers) => {
+      setGameState({ players: updatedPlayers });
+      console.log(playerID);
+      // TODO - Loop through the new players. If the new admin matches the client player, set the new player
+      for (const player of updatedPlayers) {
+        console.log(player);
+        if (player.position === "admin" && player.playerID === playerID) {
+          setPlayerState({ position: "admin" })
+          break;
+        }
+      }
+    });
+
     window.addEventListener("popstate", handleBackButton);
 
     return () => {
@@ -44,14 +57,18 @@ const Lobby = () => {
   }, []);
 
   const handleBackButton = async () => {
-    socket.emit("removePlayer");
-
-    await axios.delete("http://localhost:3000/players/removePlayer", {
+    const response = await axios.delete("http://localhost:3000/players/removePlayer", {
       params: {
         gameCode: useGameStore.getState().gameCode,
       },
       withCredentials: true,
     });
+
+    socket.emit("removePlayer");
+
+    if (response.data.switchAdmin === true) {
+      socket.emit("switchAdmin", response.data.updatedPlayers);
+    }
 
     resetGameState();
     resetPlayerState();
