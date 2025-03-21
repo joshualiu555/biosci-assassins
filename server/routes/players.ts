@@ -1,7 +1,8 @@
 import express from "express";
 
 import {
-  getPlayers,
+  getPlayer,
+  // getPlayers,
   addPlayer,
   removePlayer,
   checkPlayerExists
@@ -9,7 +10,8 @@ import {
 
 export const playersRouter = express.Router();
 
-playersRouter.get("/getPlayers", getPlayers);
+playersRouter.get("/getPlayer", getPlayer);
+// playersRouter.get("/getPlayers", getPlayers);
 playersRouter.post("/addPlayer", addPlayer);
 playersRouter.delete("/removePlayer", removePlayer);
 playersRouter.get("/checkPlayerExists", checkPlayerExists);

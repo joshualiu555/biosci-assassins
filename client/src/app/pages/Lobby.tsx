@@ -15,13 +15,26 @@ const Lobby = () => {
       });
       setGameState(response.data);
     };
-
     fetchGame()
       .then(() => {
         console.log("Game fetched");
       })
       .catch(() => {
         console.error("Failed to fetch game");
+      });
+
+    const fetchPlayer = async () => {
+      const response = await axios.get("http://localhost:3000/players/getPlayer", {
+        withCredentials: true
+      });
+      setPlayerState(response.data);
+    }
+    fetchPlayer()
+      .then(() => {
+        console.log("Player fetched");
+      })
+      .catch(() => {
+        console.error("Failed to fetch player");
       });
 
     socket.on("addedPlayer", (player) => {
@@ -34,10 +47,7 @@ const Lobby = () => {
 
     socket.on("switchedAdmin", (updatedPlayers) => {
       setGameState({ players: updatedPlayers });
-      console.log(playerID);
-      // TODO - Loop through the new players. If the new admin matches the client player, set the new player
       for (const player of updatedPlayers) {
-        console.log(player);
         if (player.position === "admin" && player.playerID === playerID) {
           setPlayerState({ position: "admin" })
           break;
@@ -51,6 +61,7 @@ const Lobby = () => {
       socket.off("addedPlayer");
       socket.off("removedPlayer");
       setTimeout(() => {
+        window.removeEventListener("load", handleRefresh);
         window.removeEventListener("popstate", handleBackButton);
       }, 0);
     };
@@ -69,6 +80,8 @@ const Lobby = () => {
     if (response.data.switchAdmin === true) {
       socket.emit("switchAdmin", response.data.updatedPlayers);
     }
+
+    localStorage.setItem("alreadyLoaded", "false");
 
     resetGameState();
     resetPlayerState();

@@ -16,6 +16,10 @@ const registerPlayersSocket = (io: Server, socket: Socket) => {
   socket.on("switchAdmin", (updatedPlayers) => {
     socket.to(socket.data.gameCode).emit("switchedAdmin", updatedPlayers);
   })
+
+  socket.on("reconnect", async () => {
+
+  })
 }
 
 export default registerPlayersSocket;
