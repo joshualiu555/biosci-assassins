@@ -13,12 +13,12 @@ const registerPlayersSocket = (io: Server, socket: Socket) => {
     socket.leave(socket.data.gameCode);
   })
 
-  socket.on("switchAdmin", (updatedPlayers) => {
+  socket.on("switchAdmin", updatedPlayers => {
     socket.to(socket.data.gameCode).emit("switchedAdmin", updatedPlayers);
   })
 
-  socket.on("reconnect", async () => {
-
+  socket.on("reconnect", gameCode => {
+    socket.join(gameCode);
   })
 }
 

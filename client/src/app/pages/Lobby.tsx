@@ -14,6 +14,7 @@ const Lobby = () => {
         withCredentials: true
       });
       setGameState(response.data);
+      socket.emit("reconnect", response.data.gameCode);
     };
     fetchGame()
       .then(() => {
