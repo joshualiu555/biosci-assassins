@@ -59,6 +59,7 @@ const GameSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+
 })
 
 export const GameModel = mongoose.model("games", GameSchema)
