@@ -61,7 +61,6 @@ const Lobby = () => {
       socket.off("addedPlayer");
       socket.off("removedPlayer");
       setTimeout(() => {
-        window.removeEventListener("load", handleRefresh);
         window.removeEventListener("popstate", handleBackButton);
       }, 0);
     };
@@ -80,8 +79,6 @@ const Lobby = () => {
     if (response.data.switchAdmin === true) {
       socket.emit("switchAdmin", response.data.updatedPlayers);
     }
-
-    localStorage.setItem("alreadyLoaded", "false");
 
     resetGameState();
     resetPlayerState();
