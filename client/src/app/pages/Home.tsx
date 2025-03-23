@@ -108,6 +108,19 @@ function Home() {
       }
     }
 
+    if (numberAssassins < 1) {
+      alert("Must have at least 1 assassin");
+      return;
+    }
+    if (timeBetweenTasks < 1) {
+      alert("Must have at least 1 minute between tasks");
+      return;
+    }
+    if (townhallTime < 1) {
+      alert("Must have at least 1 minute of townhall time");
+      return;
+    }
+
     let generatedGameCode;
     let isDuplicate = true;
     while (isDuplicate) {

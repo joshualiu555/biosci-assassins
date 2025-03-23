@@ -56,11 +56,17 @@ const Lobby = () => {
       }
     });
 
+    socket.on("startedGame", () => {
+      navigate("/game");
+    })
+
     window.addEventListener("popstate", handleBackButton);
 
     return () => {
       socket.off("addedPlayer");
       socket.off("removedPlayer");
+      socket.off("switchedAdmin");
+      socket.off("startedGame");
       setTimeout(() => {
         window.removeEventListener("popstate", handleBackButton);
       }, 0);
@@ -86,7 +92,10 @@ const Lobby = () => {
   };
 
   const handleStartGame = () => {
-
+    if (players.length < 2 * numberAssassins + 1) {
+      alert(`Must have at least ${2 * numberAssassins + 1} players`);
+      return;
+    }
   }
 
   return (
