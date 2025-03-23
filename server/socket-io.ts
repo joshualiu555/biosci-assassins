@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 
-const registerPlayersSocket = (io: Server, socket: Socket) => {
+const registerSocket = (socket: Socket) => {
   socket.on("addPlayer", ({ gameCode, player }) => {
     socket.data.gameCode = gameCode;
     socket.data.player = player;
@@ -22,4 +22,4 @@ const registerPlayersSocket = (io: Server, socket: Socket) => {
   })
 }
 
-export default registerPlayersSocket;
+export default registerSocket;

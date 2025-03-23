@@ -96,30 +96,35 @@ function Home() {
   };
 
   const handleCreateGame = async () => {
-    if (numberLocations < 1) {
-      alert("Must have at least 1 location");
-      return;
-    }
-
-    for (const location of locationInputs) {
-      if (location === "") {
-        alert("Locations cannot be empty");
-        return;
-      }
-    }
-
-    if (numberAssassins < 1) {
-      alert("Must have at least 1 assassin");
-      return;
-    }
-    if (timeBetweenTasks < 1) {
-      alert("Must have at least 1 minute between tasks");
-      return;
-    }
-    if (townhallTime < 1) {
-      alert("Must have at least 1 minute of townhall time");
-      return;
-    }
+    // TODO - Uncomment in production
+    // if (numberLocations < 1) {
+    //   alert("Must have at least 1 location");
+    //   return;
+    // }
+    //
+    // for (const location of locationInputs) {
+    //   if (location === "") {
+    //     alert("Locations cannot be empty");
+    //     return;
+    //   }
+    // }
+    //
+    // if (numberAssassins < 1) {
+    //   alert("Must have at least 1 assassin");
+    //   return;
+    // }
+    // if (numberTasks < 1) {
+    //   alert("Must have at least 1 task");
+    //   return;
+    // }
+    // if (timeBetweenTasks < 1) {
+    //   alert("Must have at least 1 minute between tasks");
+    //   return;
+    // }
+    // if (townhallTime < 1) {
+    //   alert("Must have at least 1 minute of townhall time");
+    //   return;
+    // }
 
     let generatedGameCode;
     let isDuplicate = true;

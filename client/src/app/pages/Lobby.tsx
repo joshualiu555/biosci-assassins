@@ -57,6 +57,7 @@ const Lobby = () => {
     });
 
     socket.on("startedGame", () => {
+      // show roles for 15 seconds to allow assassins to see each other
       navigate("/game");
     })
 
@@ -96,6 +97,8 @@ const Lobby = () => {
       alert(`Must have at least ${2 * numberAssassins + 1} players`);
       return;
     }
+    // send axios post / put request to assign roles
+    socket.emit("startGame");
   }
 
   return (

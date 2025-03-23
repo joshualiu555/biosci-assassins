@@ -36,9 +36,9 @@ const io = new Server(httpServer, {
   }
 });
 
-import registerPlayersSocket from "./socket-io/players";
+import registerSocket from "./socket-io";
 const onConnection = (socket: Socket) => {
-  registerPlayersSocket(io, socket);
+  registerSocket(socket);
 }
 io.on("connection", onConnection);
 
