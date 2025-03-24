@@ -1,6 +1,10 @@
-import { Server, Socket } from "socket.io";
+import { Socket } from "socket.io";
 
 const registerSocket = (socket: Socket) => {
+  socket.on("reconnect", gameCode => {
+    socket.join(gameCode);
+  })
+
   socket.on("addPlayer", ({ gameCode, player }) => {
     socket.data.gameCode = gameCode;
     socket.data.player = player;
@@ -17,8 +21,8 @@ const registerSocket = (socket: Socket) => {
     socket.to(socket.data.gameCode).emit("switchedAdmin", updatedPlayers);
   })
 
-  socket.on("reconnect", gameCode => {
-    socket.join(gameCode);
+  socket.on("startGame", () => {
+    socket.to(socket.data.gameCode).emit("startedGame");
   })
 }
 

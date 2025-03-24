@@ -92,17 +92,25 @@ const Lobby = () => {
     resetPlayerState();
   };
 
-  const handleStartGame = () => {
-    if (players.length < 2 * numberAssassins + 1) {
-      alert(`Must have at least ${2 * numberAssassins + 1} players`);
-      return;
-    }
+  const handleStartGame = async () => {
+    // TODO - Uncomment in production
+    // if (players.length < 2 * numberAssassins + 1) {
+    //   alert(`Must have at least ${2 * numberAssassins + 1} players`);
+    //   return;
+    // }
+
     // send axios post / put request to assign roles
+    await axios.put("http://localhost:3000/game/assignRoles", {
+      withCredentials: true
+    })
     socket.emit("startGame");
   }
 
   return (
     <div>
+      <div>
+        <h2>Click the back button to leave the game</h2>
+      </div>
       <div>
         <p>Game code: {gameCode}</p>
         <p>Number assassins: {numberAssassins}</p>

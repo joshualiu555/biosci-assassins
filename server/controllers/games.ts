@@ -44,10 +44,15 @@ const validCode = async (req: Request, res: Response) => {
   }
 }
 
+const assignRoles = async (req: Request, res: Response) => {
+
+}
+
 export {
   getGame,
   createGame,
   removeGame,
   gameExists,
-  validCode
+  validCode,
+  assignRoles,
 }

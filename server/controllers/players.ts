@@ -48,14 +48,13 @@ const addPlayer = async (req: Request, res: Response) => {
 
 const removePlayer = async (req: Request, res: Response) => {
   try {
-    const { gameCode } = req.query;
     const playerID = await redisClient.get(req.cookies["sessionID"]);
-
-    const game = await GameModel.findOne({ gameCode: gameCode });
+    const game = await GameModel.findOne({ "players.playerID": playerID });
     if (!game) {
       res.json({ error: "Game not found" });
       return;
     }
+    const gameCode = game.gameCode;
 
     game.players.pull({ playerID: playerID });
     await game.save();
@@ -69,12 +68,10 @@ const removePlayer = async (req: Request, res: Response) => {
     const index = updatedGame.players.findIndex(player => player.position === "admin");
     const switchAdmin = index === -1;
     if (updatedGame.players.length === 0) {
-      await removeGame(gameCode as string);
-    } else {
-      if (switchAdmin) {
-        updatedGame.players[0].position = "admin";
-        await updatedGame.save();
-      }
+      await removeGame(updatedGame.gameCode as string);
+    } else if (switchAdmin) {
+      updatedGame.players[0].position = "admin";
+      await updatedGame.save();
     }
 
     await redisClient.del(req.cookies["sessionID"]);
