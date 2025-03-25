@@ -68,7 +68,7 @@ function Home() {
         playerID: "",
         name: nameInput,
         position: playerPosition,
-        role: "unassigned",
+        role: "crewmate",
         status: "alive"
       };
 

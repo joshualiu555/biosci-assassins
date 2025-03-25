@@ -3,10 +3,13 @@ import axios from "axios";
 import socket from "../socket-io.ts";
 import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
+import { useNavigate } from "react-router-dom";
 
 const Lobby = () => {
   const { setGameState, resetGameState, gameCode, players, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
   const { setPlayerState, resetPlayerState, playerID, position } = usePlayerStore();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -57,7 +60,9 @@ const Lobby = () => {
     });
 
     socket.on("startedGame", () => {
+      // change game and player state
       // show roles for 15 seconds to allow assassins to see each other
+      // change game state to "playing"
       navigate("/game");
     })
 
@@ -99,10 +104,15 @@ const Lobby = () => {
     //   return;
     // }
 
-    // send axios post / put request to assign roles
-    await axios.put("http://localhost:3000/game/assignRoles", {
-      withCredentials: true
-    })
+    await axios.put("http://localhost:3000/games/assignRoles",
+      {
+        numberAssassins: numberAssassins,
+      },
+      {
+        withCredentials: true
+      }
+    );
+
     socket.emit("startGame");
   }
 

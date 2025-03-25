@@ -1,6 +1,6 @@
-import { Socket } from "socket.io";
+import { Server, Socket } from "socket.io";
 
-const registerSocket = (socket: Socket) => {
+const registerSocket = (io: Server, socket: Socket) => {
   socket.on("reconnect", gameCode => {
     socket.join(gameCode);
   })
@@ -22,7 +22,7 @@ const registerSocket = (socket: Socket) => {
   })
 
   socket.on("startGame", () => {
-    socket.to(socket.data.gameCode).emit("startedGame");
+    io.in(socket.data.gameCode).emit("startedGame");
   })
 }
 

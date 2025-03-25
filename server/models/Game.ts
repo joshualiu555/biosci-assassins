@@ -28,7 +28,7 @@ const GameSchema = new mongoose.Schema({
       },
       role: {
         type: String,
-        enum: ["unassigned", "assassin", "crewmate"],
+        enum: ["assassin", "crewmate"],
         required: true
       },
       status: {

@@ -16,4 +16,4 @@ gamesRouter.post("/createGame", createGame);
 gamesRouter.delete("/removeGame", removeGame);
 gamesRouter.get("/gameExists", gameExists);
 gamesRouter.get("/validCode", validCode);
-gamesRouter.put("assignRoles", assignRoles);
+gamesRouter.put("/assignRoles", assignRoles);

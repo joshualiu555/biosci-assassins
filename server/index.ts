@@ -38,7 +38,7 @@ const io = new Server(httpServer, {
 
 import registerSocket from "./socket-io";
 const onConnection = (socket: Socket) => {
-  registerSocket(socket);
+  registerSocket(io, socket);
 }
 io.on("connection", onConnection);
 
