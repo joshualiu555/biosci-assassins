@@ -36,7 +36,7 @@ const io = new Server(httpServer, {
   }
 });
 
-import registerSocket from "./socket-io";
+import registerSocket from "./websockets/socket-io";
 const onConnection = (socket: Socket) => {
   registerSocket(io, socket);
 }

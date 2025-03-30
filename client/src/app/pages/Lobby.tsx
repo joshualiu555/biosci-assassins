@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
 import useGameStore from "../zustand/gameStore.ts";
@@ -7,7 +7,9 @@ import { useNavigate } from "react-router-dom";
 
 const Lobby = () => {
   const { setGameState, resetGameState, gameCode, players, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
-  const { setPlayerState, resetPlayerState, playerID, position } = usePlayerStore();
+  const { setPlayerState, resetPlayerState, playerID, position, role } = usePlayerStore();
+
+  const [screen, setScreen] = useState("lobby");
 
   const navigate = useNavigate();
 
@@ -45,8 +47,8 @@ const Lobby = () => {
       setGameState({ players: [...useGameStore.getState().players, player] });
     });
 
-    socket.on("removedPlayer", (player) => {
-      setGameState({ players: useGameStore.getState().players.filter(searchPlayer => searchPlayer.playerID !== player.playerID) });
+    socket.on("removedPlayer", (playerID) => {
+      setGameState({ players: useGameStore.getState().players.filter(searchPlayer => searchPlayer.playerID !== playerID) });
     });
 
     socket.on("switchedAdmin", (updatedPlayers) => {
@@ -59,10 +61,16 @@ const Lobby = () => {
       }
     });
 
-    socket.on("startedGame", () => {
-      // change game and player state
+    socket.on("assignedRoles", game => {
+      console.log("Test");
+      const player = game.players.find(searchPlayer => searchPlayer.playerID === playerID);
+      setPlayerState(player);
+      setScreen("roles");
       // show roles for 15 seconds to allow assassins to see each other
-      // change game state to "playing"
+    })
+
+    socket.on("startedGame", () => {
+      setGameState({ status: "playing" })
       navigate("/game");
     })
 
@@ -72,6 +80,7 @@ const Lobby = () => {
       socket.off("addedPlayer");
       socket.off("removedPlayer");
       socket.off("switchedAdmin");
+      socket.off("assignedRoles");
       socket.off("startedGame");
       setTimeout(() => {
         window.removeEventListener("popstate", handleBackButton);
@@ -97,14 +106,14 @@ const Lobby = () => {
     resetPlayerState();
   };
 
-  const handleStartGame = async () => {
+  const handleAssignRoles = async () => {
     // TODO - Uncomment in production
     // if (players.length < 2 * numberAssassins + 1) {
     //   alert(`Must have at least ${2 * numberAssassins + 1} players`);
     //   return;
     // }
 
-    await axios.put("http://localhost:3000/games/assignRoles",
+    const response = await axios.put("http://localhost:3000/games/assignRoles",
       {
         numberAssassins: numberAssassins,
       },
@@ -112,48 +121,65 @@ const Lobby = () => {
         withCredentials: true
       }
     );
+    setGameState(response.data.game);
 
-    socket.emit("startGame");
+    socket.emit("assignRoles", response.data.game);
+  }
+
+  const handleStartGame = async () => {
+    navigate("/game");
   }
 
   return (
     <div>
-      <div>
-        <h2>Click the back button to leave the game</h2>
-      </div>
-      <div>
-        <p>Game code: {gameCode}</p>
-        <p>Number assassins: {numberAssassins}</p>
-        <p>Number tasks: {numberTasks}</p>
-        <p>Time between tasks: {timeBetweenTasks} minutes</p>
-        <p>Townhall time: {townhallTime} minutes</p>
-        <h3>Locations:</h3>
-        {locations.length > 0 ?
-          locations.map((location, index) => <p key={index}>{location}</p>)
-          :
-          <p>No locations yet...</p>
-        }
-      </div>
-      <div>
-        <h3>Players:</h3>
-        {players.length > 0 ?
-          players.map(player => <p key={player.playerID}>{player.name}</p>)
-          :
-          <p>No players yet...</p>
-        }
-      </div>
-      <div>
-        {position === "admin" ? (
-          <button onClick={handleStartGame}>
-            Start Game
-          </button>
-          ) : (
-          <p>Waiting for admin to start game</p>
-          )
-        }
-      </div>
+      {screen === "lobby" ? (
+        <div>
+          <div>
+            <h2>Click the back button to leave the game</h2>
+          </div>
+          <div>
+            <p>Game code: {gameCode}</p>
+            <p>Number assassins: {numberAssassins}</p>
+            <p>Number tasks: {numberTasks}</p>
+            <p>Time between tasks: {timeBetweenTasks} minutes</p>
+            <p>Townhall time: {townhallTime} minutes</p>
+            <h3>Locations:</h3>
+            {locations.length > 0 ? (
+              locations.map((location, index) => <p key={index}>{location}</p>)
+            ) : (
+              <p>No locations yet...</p>
+            )}
+          </div>
+          <div>
+            <h3>Players:</h3>
+            {players.length > 0 ? (
+              players.map(player => <p key={player.playerID}>{player.name}</p>)
+            ) : (
+              <p>No players yet...</p>
+            )}
+          </div>
+          <div>
+            {position === "admin" ? (
+              <button onClick={handleAssignRoles}>Assign Roles</button>
+            ) : (
+              <p>Waiting for admin to assign roles</p>
+            )}
+          </div>
+        </div>
+      ) :
+        <div>
+          <h2>{role}</h2>
+          <div>
+            {position === "admin" ? (
+              <button onClick={handleStartGame}>Start game</button>
+            ) : (
+              <p>Waiting for admin to start game</p>
+            )}
+          </div>
+        </div>
+      }
     </div>
-  );
+  )
 };
 
 export default Lobby;

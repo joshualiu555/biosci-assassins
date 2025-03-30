@@ -2,16 +2,19 @@
 
 const Game = () => {
 
+  const handleMarkDead = async () => {
 
+  }
+
+  const handleCallTownhall = async () => {
+
+  }
 
   return (
     <div>
-      <div>
-        <h2>Click the back button to leave the game</h2>
-      </div>
-      <div>
-        <p>Game</p>
-      </div>
+      <button onClick={handleMarkDead}>Mark yourself dead</button>
+      <button onClick={handleCallTownhall}>Call townhall</button>
+      <p>Click the back button to leave the game</p>
     </div>
   );
 };

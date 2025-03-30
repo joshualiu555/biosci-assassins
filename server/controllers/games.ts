@@ -63,7 +63,7 @@ const assignRoles = async (req: Request, res: Response) => {
   }
   await game.save();
 
-  res.json({ players: game.players });
+  res.json({ game: game });
 }
 
 export {
