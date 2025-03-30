@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
+import { Player } from "../types.ts";
 import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
 import { useNavigate } from "react-router-dom";
 
 const Lobby = () => {
-  const { setGameState, resetGameState, gameCode, players, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
-  const { setPlayerState, resetPlayerState, playerID, position, role } = usePlayerStore();
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [position, setPosition] = useState("");
+  const [role, setRole] = useState("");
+
+  const { setGameState, resetGameState, gameCode, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
+  const { setPlayerState, resetPlayerState, playerID, name} = usePlayerStore();
 
   const [screen, setScreen] = useState("lobby");
 
@@ -18,8 +23,16 @@ const Lobby = () => {
       const response = await axios.get("http://localhost:3000/games/getGame", {
         withCredentials: true
       });
-      setGameState(response.data);
-      socket.emit("reconnect", response.data.gameCode);
+      setGameState({
+        gameCode: response.data.game.gameCode,
+        locations: response.data.game.locations,
+        numberAssassins: response.data.game.numberAssassins,
+        numberTasks: response.data.game.numberTasks,
+        timeBetweenTasks: response.data.game.timeBetweenTasks,
+        townhallTime: response.data.game.townhallTime,
+      });
+      setPlayers(response.data.game.players);
+      socket.emit("reconnect", response.data.game.gameCode);
     };
     fetchGame()
       .then(() => {
@@ -33,7 +46,11 @@ const Lobby = () => {
       const response = await axios.get("http://localhost:3000/players/getPlayer", {
         withCredentials: true
       });
-      setPlayerState(response.data);
+      setPlayerState({
+        playerID: response.data.player.playerID,
+        name: response.data.player.name
+      });
+      setPosition(response.data.player.position);
     }
     fetchPlayer()
       .then(() => {
@@ -44,33 +61,31 @@ const Lobby = () => {
       });
 
     socket.on("addedPlayer", (player) => {
-      setGameState({ players: [...useGameStore.getState().players, player] });
+      setPlayers((prevPlayers) => [...prevPlayers, player]);
     });
 
     socket.on("removedPlayer", (playerID) => {
-      setGameState({ players: useGameStore.getState().players.filter(searchPlayer => searchPlayer.playerID !== playerID) });
+      setPlayers(prevPlayers => prevPlayers.filter(searchPlayer => searchPlayer.playerID !== playerID));
     });
 
     socket.on("switchedAdmin", (updatedPlayers) => {
-      setGameState({ players: updatedPlayers });
+      setPlayers(updatedPlayers);
       for (const player of updatedPlayers) {
-        if (player.position === "admin" && player.playerID === playerID) {
-          setPlayerState({ position: "admin" })
+        if (player.position === "admin" && player.playerID === usePlayerStore.getState().playerID) {
+          setPosition("admin")
           break;
         }
       }
     });
 
-    socket.on("assignedRoles", game => {
-      console.log("Test");
-      const player = game.players.find(searchPlayer => searchPlayer.playerID === playerID);
-      setPlayerState(player);
+    socket.on("assignedRoles", updatedPlayers => {
+      setPlayers(updatedPlayers);
+      const player = updatedPlayers.find((searchPlayer: { playerID: string; }) => searchPlayer.playerID === usePlayerStore.getState().playerID);
+      setRole(player.role);
       setScreen("roles");
-      // show roles for 15 seconds to allow assassins to see each other
     })
 
     socket.on("startedGame", () => {
-      setGameState({ status: "playing" })
       navigate("/game");
     })
 
@@ -121,13 +136,13 @@ const Lobby = () => {
         withCredentials: true
       }
     );
-    setGameState(response.data.game);
+    setPlayers(response.data.players);
 
-    socket.emit("assignRoles", response.data.game);
+    socket.emit("assignRoles", response.data.players);
   }
 
   const handleStartGame = async () => {
-    navigate("/game");
+    // set game state to "playing" on backend with axios.put
   }
 
   return (
@@ -139,6 +154,7 @@ const Lobby = () => {
           </div>
           <div>
             <p>Game code: {gameCode}</p>
+            <p>You: {name}</p>
             <p>Number assassins: {numberAssassins}</p>
             <p>Number tasks: {numberTasks}</p>
             <p>Time between tasks: {timeBetweenTasks} minutes</p>

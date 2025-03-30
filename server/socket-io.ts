@@ -21,8 +21,8 @@ const registerSocket = (io: Server, socket: Socket) => {
     socket.to(socket.data.gameCode).emit("switchedAdmin", updatedPlayers);
   })
 
-  socket.on("assignRoles", game => {
-    io.in(socket.data.gameCode).emit("assignedRoles", game);
+  socket.on("assignRoles", players => {
+    io.in(socket.data.gameCode).emit("assignedRoles", players);
   })
 
 

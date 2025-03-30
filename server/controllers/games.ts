@@ -6,7 +6,7 @@ const getGame = async (req: Request, res: Response) => {
   try {
     const playerID = await redisClient.get(req.cookies["sessionID"]);
     const game = await GameModel.findOne({ "players.playerID": playerID });
-    res.json(game);
+    res.json({ game: game });
   } catch (error) {
     res.json(error);
   }
@@ -14,9 +14,8 @@ const getGame = async (req: Request, res: Response) => {
 
 const createGame = async (req: Request, res: Response) => {
   const game = new GameModel(req.body);
-
-  const response = await game.save();
-  res.json(response);
+  await game.save();
+  res.json();
 }
 
 const removeGame = async (gameCode: string) => {
@@ -63,7 +62,7 @@ const assignRoles = async (req: Request, res: Response) => {
   }
   await game.save();
 
-  res.json({ game: game });
+  res.json({ players: game.players });
 }
 
 export {

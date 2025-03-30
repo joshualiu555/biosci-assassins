@@ -82,7 +82,10 @@ function Home() {
         }
       )
 
-      setPlayerState(response.data.player);
+      setPlayerState({
+        playerID: response.data.playerID,
+        name: response.data.name,
+      });
 
       socket.emit("addPlayer", {
         gameCode: gameCode,

@@ -5,14 +5,18 @@ import { redisClient } from "../index";
 import { removeGame } from "./games";
 
 const getPlayer = async (req: Request, res: Response) => {
-  const playerID = await redisClient.get(req.cookies["sessionID"]);
-  const game = await GameModel.findOne({ "players.playerID": playerID });
-  if (!game) {
-    res.json({ error: "Game not found" });
-    return;
+  try {
+    const playerID = await redisClient.get(req.cookies["sessionID"]);
+    const game = await GameModel.findOne({ "players.playerID": playerID });
+    if (!game) {
+      res.json({ error: "Game not found" });
+      return;
+    }
+    const player = game.players.find(searchPlayer => searchPlayer.playerID === playerID);
+    res.json({ player: player });
+  } catch (error) {
+    res.json(error);
   }
-  const player = game.players.find(searchPlayer => searchPlayer.playerID === playerID);
-  res.json(player);
 }
 
 const addPlayer = async (req: Request, res: Response) => {

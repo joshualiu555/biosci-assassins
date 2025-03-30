@@ -3,9 +3,6 @@ import { create } from "zustand";
 interface PlayerStore {
   playerID: string
   name: string
-  position: string
-  role: string
-  status: string
 
   setPlayerState: (updates: Partial<PlayerStore>) => void;
   resetPlayerState: () => void;
@@ -13,10 +10,7 @@ interface PlayerStore {
 
 const initialPlayerState = {
   playerID: "",
-  name: "",
-  position: "",
-  role: "unassigned",
-  status: "alive",
+  name: ""
 };
 
 const usePlayerStore = create<PlayerStore>((set) => ({
