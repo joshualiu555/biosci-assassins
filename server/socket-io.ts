@@ -25,7 +25,9 @@ const registerSocket = (io: Server, socket: Socket) => {
     io.in(socket.data.gameCode).emit("assignedRoles", players);
   })
 
-
+  socket.on("startGame", () => {
+    io.in(socket.data.gameCode).emit("startedGame");
+  })
 }
 
 export default registerSocket;

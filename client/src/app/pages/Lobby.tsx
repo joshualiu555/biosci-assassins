@@ -12,7 +12,7 @@ const Lobby = () => {
   const [role, setRole] = useState("");
 
   const { setGameState, resetGameState, gameCode, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
-  const { setPlayerState, resetPlayerState, playerID, name} = usePlayerStore();
+  const { setPlayerState, resetPlayerState, name} = usePlayerStore();
 
   const [screen, setScreen] = useState("lobby");
 
@@ -64,7 +64,7 @@ const Lobby = () => {
       setPlayers((prevPlayers) => [...prevPlayers, player]);
     });
 
-    socket.on("removedPlayer", (playerID) => {
+    socket.on("removedPlayer", playerID => {
       setPlayers(prevPlayers => prevPlayers.filter(searchPlayer => searchPlayer.playerID !== playerID));
     });
 
@@ -105,9 +105,6 @@ const Lobby = () => {
 
   const handleBackButton = async () => {
     const response = await axios.delete("http://localhost:3000/players/removePlayer", {
-      params: {
-        gameCode: useGameStore.getState().gameCode,
-      },
       withCredentials: true,
     });
 
@@ -130,6 +127,7 @@ const Lobby = () => {
 
     const response = await axios.put("http://localhost:3000/games/assignRoles",
       {
+        gameCode: gameCode,
         numberAssassins: numberAssassins,
       },
       {
@@ -142,7 +140,11 @@ const Lobby = () => {
   }
 
   const handleStartGame = async () => {
-    // set game state to "playing" on backend with axios.put
+    await axios.put("http://localhost:3000/games/changeStatus", {
+      gameCode: gameCode,
+      status: "playing"
+    })
+    socket.emit("startGame");
   }
 
   return (

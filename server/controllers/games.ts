@@ -44,14 +44,13 @@ const validCode = async (req: Request, res: Response) => {
 }
 
 const assignRoles = async (req: Request, res: Response) => {
-  const playerID = await redisClient.get(req.cookies["sessionID"]);
-  const game = await GameModel.findOne({ "players.playerID": playerID });
+  const { gameCode, numberAssassins } = req.body;
+  const game = await GameModel.findOne({ gameCode: gameCode });
   if (!game) {
     res.json({ error: "Game not found" });
     return;
   }
 
-  const { numberAssassins } = req.body;
   let set = new Set<number>();
   while (set.size < numberAssassins) {
     const randomNumber = Math.floor(Math.random() * game.players.length);
@@ -65,6 +64,20 @@ const assignRoles = async (req: Request, res: Response) => {
   res.json({ players: game.players });
 }
 
+const changeStatus = async (req: Request, res: Response) => {
+  const { gameCode, status } = req.body;
+  const game = await GameModel.findOne({ gameCode: gameCode });
+  if (!game) {
+    res.json({ error: "Game not found" });
+    return;
+  }
+
+  game.status = status;
+  await game.save();
+
+  res.json();
+}
+
 export {
   getGame,
   createGame,
@@ -72,4 +85,5 @@ export {
   gameExists,
   validCode,
   assignRoles,
+  changeStatus
 }
