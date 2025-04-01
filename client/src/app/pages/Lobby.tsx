@@ -7,14 +7,13 @@ import usePlayerStore from "../zustand/playerStore.ts";
 import { useNavigate } from "react-router-dom";
 
 const Lobby = () => {
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [position, setPosition] = useState("");
-  const [role, setRole] = useState("");
-
   const { setGameState, resetGameState, gameCode, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
   const { setPlayerState, resetPlayerState, name} = usePlayerStore();
 
   const [screen, setScreen] = useState("lobby");
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [position, setPosition] = useState("");
+  const [role, setRole] = useState("crewmate");
 
   const navigate = useNavigate();
 
@@ -32,6 +31,7 @@ const Lobby = () => {
         townhallTime: response.data.game.townhallTime,
       });
       setPlayers(response.data.game.players);
+      // reconnects on refresh; socket.io takes care of the same socket joining the same room twice
       socket.emit("reconnect", response.data.game.gameCode);
     };
     fetchGame()
@@ -51,6 +51,7 @@ const Lobby = () => {
         name: response.data.player.name
       });
       setPosition(response.data.player.position);
+      setRole(response.data.player.role);
     }
     fetchPlayer()
       .then(() => {

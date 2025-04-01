@@ -103,9 +103,29 @@ const checkPlayerExists = async (req: Request, res: Response) => {
   }
 }
 
+const markDead = async (req: Request, res: Response) => {
+  const { gameCode, playerID } = req.body;
+
+  const game = await GameModel.findOne({ gameCode: gameCode });
+  if (!game) {
+    res.json({ error: "Game not found" });
+    return;
+  }
+  const player = game.players.find(searchPlayer => searchPlayer.playerID === playerID);
+  if (!player) {
+    res.json({ error: "Player not found" });
+    return;
+  }
+
+  player.status = "dead";
+  await game.save();
+  res.json();
+}
+
 export {
   getPlayer,
   addPlayer,
   removePlayer,
-  checkPlayerExists
+  checkPlayerExists,
+  markDead
 }
