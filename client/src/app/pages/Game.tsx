@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
+import { useLocalStorage } from "usehooks-ts";
 import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
 import {Player} from "../types.ts";
@@ -9,7 +10,7 @@ const Game = () => {
   const { resetGameState, gameCode, numberTasks } = useGameStore();
   const { resetPlayerState, playerID } = usePlayerStore();
 
-  const [screen, setScreen] = useState("playing");
+  const [screen, setScreen, removeScreen] = useLocalStorage("screen", "playing");
   const [players, setPlayers] = useState<Player[]>([]);
   const [tasksRemaining, setTasksRemaining] = useState(numberTasks);
   const [status, setStatus] = useState("alive");
@@ -63,6 +64,9 @@ const Game = () => {
 
     resetGameState();
     resetPlayerState();
+    removeScreen();
+    localStorage.removeItem("game-storage");
+    localStorage.removeItem("player-storage");
   };
 
   const handleMarkDead = async () => {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
+import { useLocalStorage } from "usehooks-ts";
 import { Player } from "../types.ts";
 import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
@@ -10,7 +11,7 @@ const Lobby = () => {
   const { setGameState, resetGameState, gameCode, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
   const { setPlayerState, resetPlayerState, name} = usePlayerStore();
 
-  const [screen, setScreen] = useState("lobby");
+  const [screen, setScreen, removeScreen] = useLocalStorage("screen", "lobby");
   const [players, setPlayers] = useState<Player[]>([]);
   const [position, setPosition] = useState("");
   const [role, setRole] = useState("crewmate");
@@ -31,8 +32,6 @@ const Lobby = () => {
         townhallTime: response.data.game.townhallTime,
       });
       setPlayers(response.data.game.players);
-      // reconnects on refresh; socket.io takes care of the same socket joining the same room twice
-      socket.emit("reconnect", response.data.game.gameCode);
     };
     fetchGame()
       .then(() => {
@@ -52,6 +51,11 @@ const Lobby = () => {
       });
       setPosition(response.data.player.position);
       setRole(response.data.player.role);
+      // reconnects on refresh; socket.io takes care of the same socket joining the same room twice
+      socket.emit("reconnect", {
+        gameCode: useGameStore.getState().gameCode,
+        playerID: response.data.player.playerID
+      });
     }
     fetchPlayer()
       .then(() => {
@@ -117,6 +121,9 @@ const Lobby = () => {
 
     resetGameState();
     resetPlayerState();
+    removeScreen();
+    localStorage.removeItem("game-storage");
+    localStorage.removeItem("player-storage");
   };
 
   const handleAssignRoles = async () => {
@@ -146,6 +153,7 @@ const Lobby = () => {
       status: "playing"
     })
     socket.emit("startGame");
+    removeScreen();
   }
 
   return (

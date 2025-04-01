@@ -1,7 +1,9 @@
 import { Server, Socket } from "socket.io";
 
 const registerSocket = (io: Server, socket: Socket) => {
-  socket.on("reconnect", gameCode => {
+  socket.on("reconnect", ({ gameCode, playerID }) => {
+    socket.data.gameCode = gameCode;
+    socket.data.playerID = playerID;
     socket.join(gameCode);
   })
 
