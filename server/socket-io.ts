@@ -30,6 +30,10 @@ const registerSocket = (io: Server, socket: Socket) => {
   socket.on("startGame", () => {
     io.in(socket.data.gameCode).emit("startedGame");
   })
+
+  socket.on("endGame", data => {
+    io.in(socket.data.gameCode).emit("endedGame", data);
+  })
 }
 
 export default registerSocket;

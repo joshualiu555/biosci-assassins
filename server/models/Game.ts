@@ -8,7 +8,7 @@ const GameSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["waiting", "playing", "townhall", "finished"],
+    enum: ["waiting", "playing", "townhall"],
     required: true
   },
   players: [
@@ -43,11 +43,11 @@ const GameSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  numberTasks: {
-    type: Number,
+  ejectionConfirmation: {
+    type: Boolean,
     required: true
   },
-  timeBetweenTasks: {
+  numberTasks: {
     type: Number,
     required: true
   },

@@ -1,19 +1,23 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
-import { useLocalStorage } from "usehooks-ts";
+import { useSessionStorage } from "usehooks-ts";
+import { useNavigate } from "react-router-dom";
 import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
 import {Player} from "../types.ts";
+
 
 const Game = () => {
   const { resetGameState, gameCode, numberTasks } = useGameStore();
   const { resetPlayerState, playerID } = usePlayerStore();
 
-  const [screen, setScreen, removeScreen] = useLocalStorage("screen", "playing");
+  const [screen, setScreen] = useSessionStorage("screen", "playing");
   const [players, setPlayers] = useState<Player[]>([]);
   const [tasksRemaining, setTasksRemaining] = useState(numberTasks);
   const [status, setStatus] = useState("alive");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -22,7 +26,7 @@ const Game = () => {
       });
       setPlayers(response.data.game.players);
       setScreen(response.data.game.status);
-      setTasksRemaining(response.data.game.tasksRemaining);
+      setTasksRemaining(response.data.game.numberTasks);
     };
     fetchGame()
       .then(() => {
@@ -46,12 +50,20 @@ const Game = () => {
         console.error("Failed to fetch player");
       });
 
-    window.addEventListener("popstate", handleBackButton);
+    socket.on("endedGame", async data => {
+      await axios.delete("http://localhost:3000/players/removeRedisAndCookie", {
+        withCredentials: true
+      });
+      resetGameState();
+      resetPlayerState();
+      sessionStorage.removeItem("screen");
+      sessionStorage.removeItem("game-storage");
+      sessionStorage.removeItem("player-storage");
+      navigate('/finished', { state: { data: data } });
+    })
 
     return () => {
-      setTimeout(() => {
-        window.removeEventListener("popstate", handleBackButton);
-      }, 0);
+      socket.off("endedGame");
     };
   }, [])
 
@@ -64,13 +76,15 @@ const Game = () => {
 
     resetGameState();
     resetPlayerState();
-    removeScreen();
-    localStorage.removeItem("game-storage");
-    localStorage.removeItem("player-storage");
+    sessionStorage.removeItem("screen");
+    sessionStorage.removeItem("game-storage");
+    sessionStorage.removeItem("player-storage");
+
+    navigate("/");
   };
 
   const handleMarkDead = async () => {
-    await axios.put("http://localhost:3000/players/markDead",
+    const response = await axios.put("http://localhost:3000/players/markDead",
       {
         gameCode: gameCode,
         playerID: playerID
@@ -80,6 +94,12 @@ const Game = () => {
       }
     );
     setStatus("dead");
+    if (response.data.result !== "Continue") {
+      socket.emit("endGame", {
+        result: response.data.result,
+        players: response.data.players
+      });
+    }
   }
 
   const handleCallTownhall = async () => {
@@ -88,11 +108,11 @@ const Game = () => {
       status: "townhall"
     });
     setScreen("townhall");
-    // stop the tasks
   }
 
   return (
     <div>
+      {status === "alive" ? <button onClick={handleBackButton}>Leave game</button> : null}
       <button onClick={handleMarkDead}>Mark yourself dead</button>
       <button onClick={handleCallTownhall}>Call townhall</button>
       <p>Click the back button to leave the game</p>

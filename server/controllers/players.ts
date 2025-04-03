@@ -86,6 +86,13 @@ const removePlayer = async (req: Request, res: Response) => {
   }
 }
 
+const removeRedisAndCookie = async (req: Request, res: Response) => {
+  await redisClient.del(req.cookies["sessionID"]);
+  res.clearCookie("sessionID");
+
+  res.json();
+}
+
 const checkPlayerExists = async (req: Request, res: Response) => {
   const { gameCode, playerName } = req.query;
 
@@ -119,13 +126,34 @@ const markDead = async (req: Request, res: Response) => {
 
   player.status = "dead";
   await game.save();
-  res.json();
+
+  let assassinsLeft = 0, crewmatesLeft = 0;
+  for (const player of game.players) {
+    if (player.status === "alive") {
+      if (player.role === "assassin") assassinsLeft++;
+      else crewmatesLeft++;
+    }
+  }
+
+  if (assassinsLeft === 0 || assassinsLeft === crewmatesLeft) {
+    await removeGame(gameCode);
+    res.json({
+      result: assassinsLeft === 0 ? "Crewmates win" : "Assassins win",
+      players: game.players
+    });
+  } else {
+    res.json({
+      result: "Continue",
+      players: game.players
+    });
+  }
 }
 
 export {
   getPlayer,
   addPlayer,
   removePlayer,
+  removeRedisAndCookie,
   checkPlayerExists,
   markDead
 }

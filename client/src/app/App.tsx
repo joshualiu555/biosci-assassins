@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Lobby from "./pages/Lobby";
 import Game from "./pages/Game";
+import Finished from "./pages/Finished";
 
 function App() {
   return (
@@ -18,6 +19,10 @@ function App() {
         <Route
           path="/game"
           element={ <Game /> }
+        />
+        <Route
+          path="/finished"
+          element={ <Finished />}
         />
       </Routes>
     </BrowserRouter>

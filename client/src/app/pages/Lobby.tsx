@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
-import { useLocalStorage } from "usehooks-ts";
+import { useSessionStorage } from "usehooks-ts";
+import { useNavigate } from "react-router-dom";
 import { Player } from "../types.ts";
 import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
-import { useNavigate } from "react-router-dom";
 
 const Lobby = () => {
   const { setGameState, resetGameState, gameCode, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
   const { setPlayerState, resetPlayerState, name} = usePlayerStore();
 
-  const [screen, setScreen, removeScreen] = useLocalStorage("screen", "lobby");
+  const [screen, setScreen] = useSessionStorage("screen", "lobby");
   const [players, setPlayers] = useState<Player[]>([]);
+  const [ejectionConfirmation, setEjectionConfirmation] = useState(false);
   const [position, setPosition] = useState("");
   const [role, setRole] = useState("crewmate");
 
@@ -32,6 +33,7 @@ const Lobby = () => {
         townhallTime: response.data.game.townhallTime,
       });
       setPlayers(response.data.game.players);
+      setEjectionConfirmation(response.data.game.ejectionConfirmation);
     };
     fetchGame()
       .then(() => {
@@ -94,17 +96,12 @@ const Lobby = () => {
       navigate("/game");
     })
 
-    window.addEventListener("popstate", handleBackButton);
-
     return () => {
       socket.off("addedPlayer");
       socket.off("removedPlayer");
       socket.off("switchedAdmin");
       socket.off("assignedRoles");
       socket.off("startedGame");
-      setTimeout(() => {
-        window.removeEventListener("popstate", handleBackButton);
-      }, 0);
     };
   }, []);
 
@@ -121,9 +118,11 @@ const Lobby = () => {
 
     resetGameState();
     resetPlayerState();
-    removeScreen();
-    localStorage.removeItem("game-storage");
-    localStorage.removeItem("player-storage");
+    sessionStorage.removeItem("screen");
+    sessionStorage.removeItem("game-storage");
+    sessionStorage.removeItem("player-storage");
+
+    navigate("/");
   };
 
   const handleAssignRoles = async () => {
@@ -153,20 +152,18 @@ const Lobby = () => {
       status: "playing"
     })
     socket.emit("startGame");
-    removeScreen();
   }
 
   return (
     <div>
       {screen === "lobby" ? (
         <div>
-          <div>
-            <h2>Click the back button to leave the game</h2>
-          </div>
+          <button onClick={handleBackButton}>Leave game</button>
           <div>
             <p>Game code: {gameCode}</p>
             <p>You: {name}</p>
             <p>Number assassins: {numberAssassins}</p>
+            <p>Ejection Confirmation: {ejectionConfirmation ? "on" : "off"}</p>
             <p>Number tasks: {numberTasks}</p>
             <p>Time between tasks: {timeBetweenTasks} minutes</p>
             <p>Townhall time: {townhallTime} minutes</p>

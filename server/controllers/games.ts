@@ -74,7 +74,6 @@ const changeStatus = async (req: Request, res: Response) => {
 
   game.status = status;
   await game.save();
-
   res.json();
 }
 

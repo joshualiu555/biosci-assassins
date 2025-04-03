@@ -8,8 +8,8 @@ function Home() {
   const [nameInput, setNameInput] = useState("");
   const [gameCodeInput, setGameCodeInput] = useState("");
   const [numberAssassins, setNumberAssassins] = useState(0);
+  const [ejectionConfirmation, setEjectionConfirmation] = useState(false);
   const [numberTasks, setNumberTasks] = useState(0);
-  const [timeBetweenTasks, setTimeBetweenTasks] = useState(0);
   const [townhallTime, setTownhallTime] = useState(0);
   const [numberLocations, setNumberLocations] = useState(0);
   const [locationInputs, setLocationInputs] = useState<string[]>([]);
@@ -17,8 +17,8 @@ function Home() {
   const handleNameInputChange = (e: React.ChangeEvent<HTMLInputElement>) => setNameInput(e.target.value);
   const handleGameCodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => setGameCodeInput(e.target.value);
   const handleAssassinsChange = (e: React.ChangeEvent<HTMLInputElement>) => setNumberAssassins(Number(e.target.value));
+  const handleEjectionConfirmationChange = () => setEjectionConfirmation(!ejectionConfirmation);
   const handleTasksChange = (e: React.ChangeEvent<HTMLInputElement>) => setNumberTasks(Number(e.target.value));
-  const handleTimeBetweenTasksChange = (e: React.ChangeEvent<HTMLInputElement>) => setTimeBetweenTasks(Number(e.target.value));
   const handleTownhallTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => setTownhallTime(Number(e.target.value));
   const handleLocationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newNumberLocations = Number(e.target.value);
@@ -147,8 +147,8 @@ function Home() {
       players: [],
       locations: locationInputs,
       numberAssassins: numberAssassins,
+      ejectionConfirmation: ejectionConfirmation,
       numberTasks: numberTasks,
-      timeBetweenTasks: timeBetweenTasks,
       townhallTime: townhallTime,
       tasksRemaining: numberTasks
     };
@@ -188,20 +188,21 @@ function Home() {
         onChange={handleAssassinsChange}
       />
 
+      <p>
+        <input
+          type="checkbox"
+          checked={ejectionConfirmation}
+          onChange={handleEjectionConfirmationChange}
+        />
+        Ejection Confirmation
+      </p>
+
       <p>Number of Tasks:</p>
       <input
         type="text"
         inputMode="numeric"
         value={numberTasks}
         onChange={handleTasksChange}
-      />
-
-      <p>Time Between Tasks: {timeBetweenTasks} minutes</p>
-      <input
-        type="text"
-        inputMode="numeric"
-        value={timeBetweenTasks}
-        onChange={handleTimeBetweenTasksChange}
       />
 
       <p>Townhall Time: {townhallTime} minutes</p>
