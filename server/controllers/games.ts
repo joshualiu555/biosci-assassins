@@ -77,6 +77,27 @@ const changeStatus = async (req: Request, res: Response) => {
   res.json();
 }
 
+const completeTask = async (req: Request, res: Response) => {
+  const { gameCode, role } = req.body;
+  const game = await GameModel.findOne({ gameCode: gameCode });
+  if (!game) {
+    res.json({ error: "Game not found" });
+    return;
+  }
+
+  console.log(role);
+  if (role === "crewmate") game.tasksRemaining--;
+  await game.save();
+
+  const result = game.tasksRemaining === 0 ? "Crewmates win" : "Continue";
+  if (game.tasksRemaining === 0) await removeGame(gameCode);
+  res.json({
+    result,
+    tasksRemaining: game.tasksRemaining,
+    players: game.players
+  });
+}
+
 export {
   getGame,
   createGame,
@@ -84,5 +105,6 @@ export {
   gameExists,
   validCode,
   assignRoles,
-  changeStatus
+  changeStatus,
+  completeTask
 }

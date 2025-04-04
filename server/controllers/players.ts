@@ -135,7 +135,7 @@ const markDead = async (req: Request, res: Response) => {
     }
   }
 
-  if (assassinsLeft === 0 || assassinsLeft === crewmatesLeft) {
+  if (assassinsLeft === 0 || assassinsLeft >= crewmatesLeft) {
     await removeGame(gameCode);
     res.json({
       result: assassinsLeft === 0 ? "Crewmates win" : "Assassins win",

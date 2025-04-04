@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 interface GameStore {
   gameCode: string;
@@ -30,7 +30,8 @@ const useGameStore = create<GameStore>()(
       resetGameState: () => set(() => ({ ...initialGameState })),
     }),
     {
-      name: "game-storage"
+      name: "game-storage",
+      storage: createJSONStorage(() => sessionStorage)
     }
   )
 );

@@ -7,7 +7,8 @@ import {
   gameExists,
   validCode,
   assignRoles,
-  changeStatus
+  changeStatus,
+  completeTask
 } from "../controllers/games";
 
 export const gamesRouter = express.Router();
@@ -19,3 +20,4 @@ gamesRouter.get("/gameExists", gameExists);
 gamesRouter.get("/validCode", validCode);
 gamesRouter.put("/assignRoles", assignRoles);
 gamesRouter.put("/changeStatus", changeStatus);
+gamesRouter.put("/completeTask", completeTask);

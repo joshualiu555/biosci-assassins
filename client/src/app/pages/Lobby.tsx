@@ -34,6 +34,7 @@ const Lobby = () => {
       });
       setPlayers(response.data.game.players);
       setEjectionConfirmation(response.data.game.ejectionConfirmation);
+      setScreen("lobby");
     };
     fetchGame()
       .then(() => {
@@ -49,7 +50,7 @@ const Lobby = () => {
       });
       setPlayerState({
         playerID: response.data.player.playerID,
-        name: response.data.player.name
+        name: response.data.player.name,
       });
       setPosition(response.data.player.position);
       setRole(response.data.player.role);
@@ -88,6 +89,9 @@ const Lobby = () => {
     socket.on("assignedRoles", updatedPlayers => {
       setPlayers(updatedPlayers);
       const player = updatedPlayers.find((searchPlayer: { playerID: string; }) => searchPlayer.playerID === usePlayerStore.getState().playerID);
+      setPlayerState({
+        role: player.role
+      });
       setRole(player.role);
       setScreen("roles");
     })

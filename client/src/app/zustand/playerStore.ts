@@ -1,9 +1,11 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 interface PlayerStore {
   playerID: string;
   name: string;
+  role: string;
+
   setPlayerState: (updates: Partial<PlayerStore>) => void;
   resetPlayerState: () => void;
 }
@@ -11,6 +13,7 @@ interface PlayerStore {
 const initialPlayerState = {
   playerID: "",
   name: "",
+  role: ""
 };
 
 const usePlayerStore = create<PlayerStore>()(
@@ -22,7 +25,8 @@ const usePlayerStore = create<PlayerStore>()(
       resetPlayerState: () => set(() => ({ ...initialPlayerState })),
     }),
     {
-      name: "player-storage"
+      name: "player-storage",
+      storage: createJSONStorage(() => sessionStorage)
     }
   )
 );

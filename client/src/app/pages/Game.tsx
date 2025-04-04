@@ -6,12 +6,13 @@ import { useNavigate } from "react-router-dom";
 import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
 import {Player} from "../types.ts";
-
+import Task from "../components/Task.tsx"
 
 const Game = () => {
   const { resetGameState, gameCode, numberTasks } = useGameStore();
-  const { resetPlayerState, playerID } = usePlayerStore();
+  const { resetPlayerState, playerID, role } = usePlayerStore();
 
+  const [doingTask, setDoingTask] = useState(false);
   const [screen, setScreen] = useSessionStorage("screen", "playing");
   const [players, setPlayers] = useState<Player[]>([]);
   const [tasksRemaining, setTasksRemaining] = useState(numberTasks);
@@ -27,6 +28,7 @@ const Game = () => {
       setPlayers(response.data.game.players);
       setScreen(response.data.game.status);
       setTasksRemaining(response.data.game.numberTasks);
+      setScreen("playing");
     };
     fetchGame()
       .then(() => {
@@ -50,6 +52,14 @@ const Game = () => {
         console.error("Failed to fetch player");
       });
 
+    socket.on("completedTask", remaining => {
+      setTasksRemaining(remaining);
+    })
+
+    socket.on("removedPlayer", playerID => {
+      setPlayers(prevPlayers => prevPlayers.filter(searchPlayer => searchPlayer.playerID !== playerID));
+    });
+
     socket.on("endedGame", async data => {
       await axios.delete("http://localhost:3000/players/removeRedisAndCookie", {
         withCredentials: true
@@ -63,6 +73,7 @@ const Game = () => {
     })
 
     return () => {
+      socket.off("removedPlayer");
       socket.off("endedGame");
     };
   }, [])
@@ -110,11 +121,44 @@ const Game = () => {
     setScreen("townhall");
   }
 
+  const handleCompleteTask = async () => {
+    const response = await axios.put("http://localhost:3000/games/completeTask",
+      {
+        gameCode: gameCode,
+        role: role
+      },
+      {
+        withCredentials: true
+      }
+    );
+    if (response.data.result === "Crewmates win") {
+      socket.emit("endGame", {
+        result: response.data.result,
+        players: response.data.players
+      });
+    }
+    if (role === "crewmate") socket.emit("completeTask", tasksRemaining - 1);
+    setDoingTask(false);
+  }
+
   return (
     <div>
-      {status === "alive" ? <button onClick={handleBackButton}>Leave game</button> : null}
-      <button onClick={handleMarkDead}>Mark yourself dead</button>
+      {status === "alive" && <button onClick={handleMarkDead}>Mark yourself dead</button>}
+      <button onClick={handleBackButton}>Leave game</button>
       <button onClick={handleCallTownhall}>Call townhall</button>
+      <p>{tasksRemaining}</p>
+
+      {!doingTask && (
+        <button onClick={() => {setDoingTask(true)}}>
+          Start task
+        </button>
+      )}
+      {doingTask && (
+        <button onClick={handleCompleteTask}>Complete task</button>
+      )}
+      {doingTask && <Task />}
+
+
       <p>Click the back button to leave the game</p>
       <p>{status}</p>
       <p>{screen}</p>
