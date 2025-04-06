@@ -36,7 +36,7 @@ const validCode = async (req: Request, res: Response) => {
   const { gameCode } = req.query;
 
   const game = await GameModel.findOne({ gameCode: gameCode });
-  if (game && game.status == "waiting") {
+  if (game && game.status == "lobby") {
     res.json({ result: "Valid code" });
   } else {
     res.json({ result: "Invalid code" });

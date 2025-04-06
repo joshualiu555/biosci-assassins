@@ -8,7 +8,7 @@ const GameSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["waiting", "playing", "townhall"],
+    enum: ["lobby", "roles", "playing", "townhall"],
     required: true
   },
   players: [

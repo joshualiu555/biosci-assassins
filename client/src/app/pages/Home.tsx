@@ -143,7 +143,7 @@ function Home() {
 
     const game = {
       gameCode: generatedGameCode,
-      status: "waiting",
+      status: "lobby",
       players: [],
       locations: locationInputs,
       numberAssassins: numberAssassins,

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
-import { useSessionStorage } from "usehooks-ts";
 import { useNavigate } from "react-router-dom";
 import { Player } from "../types.ts";
 import useGameStore from "../zustand/gameStore.ts";
@@ -11,7 +10,7 @@ const Lobby = () => {
   const { setGameState, resetGameState, gameCode, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
   const { setPlayerState, resetPlayerState, name} = usePlayerStore();
 
-  const [screen, setScreen] = useSessionStorage("screen", "lobby");
+  const [screen, setScreen] = useState("");
   const [players, setPlayers] = useState<Player[]>([]);
   const [ejectionConfirmation, setEjectionConfirmation] = useState(false);
   const [position, setPosition] = useState("");
@@ -34,7 +33,7 @@ const Lobby = () => {
       });
       setPlayers(response.data.game.players);
       setEjectionConfirmation(response.data.game.ejectionConfirmation);
-      setScreen("lobby");
+      setScreen(response.data.game.status);
     };
     fetchGame()
       .then(() => {
@@ -135,6 +134,11 @@ const Lobby = () => {
     //   alert(`Must have at least ${2 * numberAssassins + 1} players`);
     //   return;
     // }
+
+    await axios.put("http://localhost:3000/games/changeStatus", {
+      gameCode: gameCode,
+      status: "roles"
+    })
 
     const response = await axios.put("http://localhost:3000/games/assignRoles",
       {

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
-import { useSessionStorage } from "usehooks-ts";
 import { useNavigate } from "react-router-dom";
 import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
@@ -13,7 +12,7 @@ const Game = () => {
   const { resetPlayerState, playerID, role } = usePlayerStore();
 
   const [doingTask, setDoingTask] = useState(false);
-  const [screen, setScreen] = useSessionStorage("screen", "playing");
+  const [screen, setScreen] = useState("")
   const [players, setPlayers] = useState<Player[]>([]);
   const [tasksRemaining, setTasksRemaining] = useState(numberTasks);
   const [status, setStatus] = useState("alive");
@@ -28,7 +27,6 @@ const Game = () => {
       setPlayers(response.data.game.players);
       setScreen(response.data.game.status);
       setTasksRemaining(response.data.game.numberTasks);
-      setScreen("playing");
     };
     fetchGame()
       .then(() => {
