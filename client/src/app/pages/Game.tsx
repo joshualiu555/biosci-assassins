@@ -159,7 +159,7 @@ const Game = () => {
       )}
 
       {screen === "townhall" && (
-        <Townhall players={players}/>
+        <Townhall />
       )}
 
       <p>Click the back button to leave the game</p>
