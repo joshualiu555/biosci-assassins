@@ -35,6 +35,8 @@ const registerSocket = (io: Server, socket: Socket) => {
     io.in(socket.data.gameCode).emit("completedTask", tasksRemaining);
   })
 
+
+
   socket.on("endGame", data => {
     io.in(socket.data.gameCode).emit("endedGame", data);
   })

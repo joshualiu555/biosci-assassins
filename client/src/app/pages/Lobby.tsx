@@ -2,16 +2,13 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
 import { useNavigate } from "react-router-dom";
-import { Player } from "../types.ts";
 import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
 
 const Lobby = () => {
-  const { setGameState, resetGameState, gameCode, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime } = useGameStore();
+  const { setGameState, resetGameState, gameCode, players, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime, screen } = useGameStore();
   const { setPlayerState, resetPlayerState, name} = usePlayerStore();
 
-  const [screen, setScreen] = useState("");
-  const [players, setPlayers] = useState<Player[]>([]);
   const [ejectionConfirmation, setEjectionConfirmation] = useState(false);
   const [position, setPosition] = useState("");
   const [role, setRole] = useState("crewmate");
@@ -25,15 +22,15 @@ const Lobby = () => {
       });
       setGameState({
         gameCode: response.data.game.gameCode,
+        players: response.data.game.players,
         locations: response.data.game.locations,
         numberAssassins: response.data.game.numberAssassins,
         numberTasks: response.data.game.numberTasks,
         timeBetweenTasks: response.data.game.timeBetweenTasks,
         townhallTime: response.data.game.townhallTime,
+        screen: response.data.game.status
       });
-      setPlayers(response.data.game.players);
       setEjectionConfirmation(response.data.game.ejectionConfirmation);
-      setScreen(response.data.game.status);
     };
     fetchGame()
       .then(() => {
@@ -68,15 +65,16 @@ const Lobby = () => {
       });
 
     socket.on("addedPlayer", (player) => {
-      setPlayers((prevPlayers) => [...prevPlayers, player]);
+      console.log("Added player");
+      setGameState({ players: [...useGameStore.getState().players, player] });
     });
 
     socket.on("removedPlayer", playerID => {
-      setPlayers(prevPlayers => prevPlayers.filter(searchPlayer => searchPlayer.playerID !== playerID));
+      setGameState({ players: useGameStore.getState().players.filter((player) => player.playerID !== playerID) });
     });
 
     socket.on("switchedAdmin", (updatedPlayers) => {
-      setPlayers(updatedPlayers);
+      setGameState({ players: updatedPlayers });
       for (const player of updatedPlayers) {
         if (player.position === "admin" && player.playerID === usePlayerStore.getState().playerID) {
           setPosition("admin")
@@ -86,13 +84,13 @@ const Lobby = () => {
     });
 
     socket.on("assignedRoles", updatedPlayers => {
-      setPlayers(updatedPlayers);
+      setGameState({ players: updatedPlayers });
       const player = updatedPlayers.find((searchPlayer: { playerID: string; }) => searchPlayer.playerID === usePlayerStore.getState().playerID);
       setPlayerState({
         role: player.role
       });
       setRole(player.role);
-      setScreen("roles");
+      setGameState({ screen: "roles" });
     })
 
     socket.on("startedGame", () => {
@@ -108,7 +106,7 @@ const Lobby = () => {
     };
   }, []);
 
-  const handleBackButton = async () => {
+  const handleLeaveGame = async () => {
     const response = await axios.delete("http://localhost:3000/players/removePlayer", {
       withCredentials: true,
     });
@@ -149,7 +147,7 @@ const Lobby = () => {
         withCredentials: true
       }
     );
-    setPlayers(response.data.players);
+    setGameState({ players: response.data.players });
 
     socket.emit("assignRoles", response.data.players);
   }
@@ -166,7 +164,7 @@ const Lobby = () => {
     <div>
       {screen === "lobby" ? (
         <div>
-          <button onClick={handleBackButton}>Leave game</button>
+          <button onClick={handleLeaveGame}>Leave game</button>
           <div>
             <p>Game code: {gameCode}</p>
             <p>You: {name}</p>

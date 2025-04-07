@@ -51,10 +51,6 @@ const GameSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  townhallTime: {
-    type: Number,
-    required: true
-  },
   tasksRemaining: {
     type: Number,
     required: true

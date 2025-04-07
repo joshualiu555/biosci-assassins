@@ -98,6 +98,10 @@ const completeTask = async (req: Request, res: Response) => {
   });
 }
 
+const castVote = async (req: Request, res: Response) => {
+
+}
+
 export {
   getGame,
   createGame,
@@ -106,5 +110,6 @@ export {
   validCode,
   assignRoles,
   changeStatus,
-  completeTask
+  completeTask,
+  castVote
 }

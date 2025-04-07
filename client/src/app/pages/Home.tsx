@@ -10,7 +10,6 @@ function Home() {
   const [numberAssassins, setNumberAssassins] = useState(0);
   const [ejectionConfirmation, setEjectionConfirmation] = useState(false);
   const [numberTasks, setNumberTasks] = useState(0);
-  const [townhallTime, setTownhallTime] = useState(0);
   const [numberLocations, setNumberLocations] = useState(0);
   const [locationInputs, setLocationInputs] = useState<string[]>([]);
 
@@ -19,7 +18,6 @@ function Home() {
   const handleAssassinsChange = (e: React.ChangeEvent<HTMLInputElement>) => setNumberAssassins(Number(e.target.value));
   const handleEjectionConfirmationChange = () => setEjectionConfirmation(!ejectionConfirmation);
   const handleTasksChange = (e: React.ChangeEvent<HTMLInputElement>) => setNumberTasks(Number(e.target.value));
-  const handleTownhallTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => setTownhallTime(Number(e.target.value));
   const handleLocationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newNumberLocations = Number(e.target.value);
     setNumberLocations(newNumberLocations);
@@ -149,7 +147,6 @@ function Home() {
       numberAssassins: numberAssassins,
       ejectionConfirmation: ejectionConfirmation,
       numberTasks: numberTasks,
-      townhallTime: townhallTime,
       tasksRemaining: numberTasks
     };
     await axios.post("http://localhost:3000/games/createGame", game);
@@ -203,14 +200,6 @@ function Home() {
         inputMode="numeric"
         value={numberTasks}
         onChange={handleTasksChange}
-      />
-
-      <p>Townhall Time: {townhallTime} minutes</p>
-      <input
-        type="text"
-        inputMode="numeric"
-        value={townhallTime}
-        onChange={handleTownhallTimeChange}
       />
 
       <p>Number Locations: {numberLocations}</p>

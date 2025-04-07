@@ -4,16 +4,14 @@ import socket from "../socket-io.ts";
 import { useNavigate } from "react-router-dom";
 import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
-import {Player} from "../types.ts";
 import Task from "../components/Task.tsx"
+import Townhall from "../components/Townhall.tsx";
 
 const Game = () => {
-  const { resetGameState, gameCode, numberTasks } = useGameStore();
+  const { setGameState, resetGameState, gameCode, players, numberTasks, screen } = useGameStore();
   const { resetPlayerState, playerID, role } = usePlayerStore();
 
   const [doingTask, setDoingTask] = useState(false);
-  const [screen, setScreen] = useState("")
-  const [players, setPlayers] = useState<Player[]>([]);
   const [tasksRemaining, setTasksRemaining] = useState(numberTasks);
   const [status, setStatus] = useState("alive");
 
@@ -24,9 +22,11 @@ const Game = () => {
       const response = await axios.get("http://localhost:3000/games/getGame", {
         withCredentials: true
       });
-      setPlayers(response.data.game.players);
-      setScreen(response.data.game.status);
       setTasksRemaining(response.data.game.numberTasks);
+      setGameState({
+        players: response.data.game.players,
+        screen: response.data.game.status
+      });
     };
     fetchGame()
       .then(() => {
@@ -55,7 +55,7 @@ const Game = () => {
     })
 
     socket.on("removedPlayer", playerID => {
-      setPlayers(prevPlayers => prevPlayers.filter(searchPlayer => searchPlayer.playerID !== playerID));
+      setGameState({ players: players.filter((player) => player.playerID !== playerID) });
     });
 
     socket.on("endedGame", async data => {
@@ -76,7 +76,7 @@ const Game = () => {
     };
   }, [])
 
-  const handleBackButton = async () => {
+  const handleLeaveGame = async () => {
     await axios.delete("http://localhost:3000/players/removePlayer", {
       withCredentials: true,
     });
@@ -116,7 +116,7 @@ const Game = () => {
       gameCode: gameCode,
       status: "townhall"
     });
-    setScreen("townhall");
+    setGameState({ screen: "townhall" });
   }
 
   const handleCompleteTask = async () => {
@@ -142,20 +142,25 @@ const Game = () => {
   return (
     <div>
       {status === "alive" && <button onClick={handleMarkDead}>Mark yourself dead</button>}
-      <button onClick={handleBackButton}>Leave game</button>
+      <button onClick={handleLeaveGame}>Leave game</button>
       <button onClick={handleCallTownhall}>Call townhall</button>
       <p>{tasksRemaining}</p>
 
-      {!doingTask && (
+      {!doingTask && screen != "townhall" && (
         <button onClick={() => {setDoingTask(true)}}>
           Start task
         </button>
       )}
-      {doingTask && (
-        <button onClick={handleCompleteTask}>Complete task</button>
+      {doingTask && screen != "townhall" && (
+        <div>
+          <button onClick={handleCompleteTask}>Complete task</button>
+          <Task />
+        </div>
       )}
-      {doingTask && <Task />}
 
+      {screen === "townhall" && (
+        <Townhall players={players}/>
+      )}
 
       <p>Click the back button to leave the game</p>
       <p>{status}</p>
