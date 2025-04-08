@@ -8,7 +8,7 @@ const GameSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["lobby", "roles", "playing", "townhall"],
+    enum: ["lobby", "roles", "playing", "voting", "result"],
     required: true
   },
   players: [
@@ -36,6 +36,11 @@ const GameSchema = new mongoose.Schema({
         enum: ["alive", "dead"],
         required: true
       },
+      // the vote string is the playerID
+      vote: {
+        type: String,
+        required: false
+      }
     },
   ],
   locations: [],

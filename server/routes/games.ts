@@ -8,8 +8,7 @@ import {
   validCode,
   assignRoles,
   changeStatus,
-  completeTask,
-  castVote
+  completeTask
 } from "../controllers/games";
 
 export const gamesRouter = express.Router();
@@ -22,4 +21,3 @@ gamesRouter.get("/validCode", validCode);
 gamesRouter.put("/assignRoles", assignRoles);
 gamesRouter.put("/changeStatus", changeStatus);
 gamesRouter.put("/completeTask", completeTask);
-gamesRouter.post("/castVote", castVote);

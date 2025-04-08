@@ -67,7 +67,8 @@ function Home() {
         name: nameInput,
         position: playerPosition,
         role: "crewmate",
-        status: "alive"
+        status: "alive",
+        vote: ""
       };
 
       const response = await axios.post("http://localhost:3000/players/addPlayer",

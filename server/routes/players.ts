@@ -6,7 +6,8 @@ import {
   removePlayer,
   removeRedisAndCookie,
   checkPlayerExists,
-  markDead
+  markDead,
+  castVote
 } from "../controllers/players";
 
 export const playersRouter = express.Router();
@@ -17,3 +18,4 @@ playersRouter.delete("/removePlayer", removePlayer);
 playersRouter.delete("/removeRedisAndCookie", removeRedisAndCookie);
 playersRouter.get("/checkPlayerExists", checkPlayerExists);
 playersRouter.put("/markDead", markDead);
+playersRouter.post("/castVote", castVote);

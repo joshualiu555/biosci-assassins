@@ -6,10 +6,9 @@ import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
 
 const Lobby = () => {
-  const { setGameState, resetGameState, gameCode, players, locations, numberAssassins, numberTasks, timeBetweenTasks, townhallTime, screen } = useGameStore();
+  const { setGameState, resetGameState, gameCode, players, locations, numberAssassins, ejectionConfirmation, numberTasks, timeBetweenTasks, townhallTime, screen } = useGameStore();
   const { setPlayerState, resetPlayerState, name} = usePlayerStore();
 
-  const [ejectionConfirmation, setEjectionConfirmation] = useState(false);
   const [position, setPosition] = useState("");
   const [role, setRole] = useState("crewmate");
 
@@ -25,12 +24,12 @@ const Lobby = () => {
         players: response.data.game.players,
         locations: response.data.game.locations,
         numberAssassins: response.data.game.numberAssassins,
+        ejectionConfirmation: response.data.game.ejectionConfirmation,
         numberTasks: response.data.game.numberTasks,
         timeBetweenTasks: response.data.game.timeBetweenTasks,
         townhallTime: response.data.game.townhallTime,
         screen: response.data.game.status
       });
-      setEjectionConfirmation(response.data.game.ejectionConfirmation);
     };
     fetchGame()
       .then(() => {

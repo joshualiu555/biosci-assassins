@@ -7,6 +7,7 @@ interface GameStore {
   players: Player[];
   locations: string[];
   numberAssassins: number;
+  ejectionConfirmation: boolean;
   numberTasks: number;
   timeBetweenTasks: number;
   townhallTime: number;
@@ -21,6 +22,7 @@ const initialGameState = {
   players: [],
   locations: [],
   numberAssassins: 0,
+  ejectionConfirmation: false,
   numberTasks: 0,
   timeBetweenTasks: 0,
   townhallTime: 0,

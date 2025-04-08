@@ -85,7 +85,6 @@ const completeTask = async (req: Request, res: Response) => {
     return;
   }
 
-  console.log(role);
   if (role === "crewmate") game.tasksRemaining--;
   await game.save();
 
@@ -98,10 +97,6 @@ const completeTask = async (req: Request, res: Response) => {
   });
 }
 
-const castVote = async (req: Request, res: Response) => {
-
-}
-
 export {
   getGame,
   createGame,
@@ -110,6 +105,5 @@ export {
   validCode,
   assignRoles,
   changeStatus,
-  completeTask,
-  castVote
+  completeTask
 }

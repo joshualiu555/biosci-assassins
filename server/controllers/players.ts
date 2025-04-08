@@ -149,11 +149,68 @@ const markDead = async (req: Request, res: Response) => {
   }
 }
 
+const castVote = async (req: Request, res: Response) => {
+  const { vote } = req.body;
+
+  const playerID = await redisClient.get(req.cookies["sessionID"]);
+  const game = await GameModel.findOne({ "players.playerID": playerID });
+  if (!game) {
+    res.json({ error: "Game not found" });
+    return;
+  }
+
+  const player = game.players.find((searchPlayer) => searchPlayer.playerID === playerID);
+  if (!player) {
+    res.json({ error: "Player not found" });
+    return;
+  }
+
+  player.vote = vote;
+  await game.save();
+
+  const updatedGame = await GameModel.findOne({ "players.playerID": playerID });
+  if (!updatedGame) {
+    res.json({ error: "Game not found" });
+    return;
+  }
+
+  let allVoted = true;
+  for (const player of updatedGame.players) {
+    if (player.vote === "") {
+      allVoted = false;
+      break;
+    }
+  }
+
+  if (!allVoted) res.json({ allVoted: false, isAssassin: null, voteOut: null, players: updatedGame.players });
+
+  let votes = new Map();
+  if (allVoted) {
+    for (const player of updatedGame.players) {
+      votes.set(player.vote, (votes.get(player.id) || 0) + 1);
+    }
+  }
+
+  for (const [key, value] of votes) {
+    if (value > updatedGame.players.length / 2) {
+      const player = updatedGame.players.find(searchPlayer => searchPlayer.playerID === key);
+      if (!player) {
+        res.json("Player not found");
+        return;
+      }
+      res.json({ allVoted: true, isAssassin: player.role === "assassin", voteOut: key, players: updatedGame.players });
+    }
+  }
+
+  res.json({ allVoted: true, isAssassin: null, voteOut: null, players: updatedGame.players });
+}
+
 export {
   getPlayer,
   addPlayer,
   removePlayer,
   removeRedisAndCookie,
   checkPlayerExists,
-  markDead
+  markDead,
+  castVote
 }

@@ -114,9 +114,9 @@ const Game = () => {
   const handleCallTownhall = async () => {
     await axios.put("http://localhost:3000/games/changeStatus", {
       gameCode: gameCode,
-      status: "townhall"
+      status: "voting"
     });
-    setGameState({ screen: "townhall" });
+    setGameState({ screen: "voting" });
   }
 
   const handleCompleteTask = async () => {
@@ -146,19 +146,19 @@ const Game = () => {
       <button onClick={handleCallTownhall}>Call townhall</button>
       <p>{tasksRemaining}</p>
 
-      {!doingTask && screen != "townhall" && (
+      {!doingTask && screen != "voting" && (
         <button onClick={() => {setDoingTask(true)}}>
           Start task
         </button>
       )}
-      {doingTask && screen != "townhall" && (
+      {doingTask && screen != "voting" && (
         <div>
           <button onClick={handleCompleteTask}>Complete task</button>
           <Task />
         </div>
       )}
 
-      {screen === "townhall" && (
+      {screen === "voting" && (
         <Townhall />
       )}
 
