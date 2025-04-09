@@ -127,8 +127,14 @@ const markDead = async (req: Request, res: Response) => {
   player.status = "dead";
   await game.save();
 
+  const updatedGame = await GameModel.findOne({ gameCode: gameCode });
+  if (!updatedGame) {
+    res.json({ error: "Game not found" });
+    return;
+  }
+
   let assassinsLeft = 0, crewmatesLeft = 0;
-  for (const player of game.players) {
+  for (const player of updatedGame.players) {
     if (player.status === "alive") {
       if (player.role === "assassin") assassinsLeft++;
       else crewmatesLeft++;
@@ -136,29 +142,30 @@ const markDead = async (req: Request, res: Response) => {
   }
 
   if (assassinsLeft === 0 || assassinsLeft >= crewmatesLeft) {
+    const players = updatedGame.players;
     await removeGame(gameCode);
     res.json({
       result: assassinsLeft === 0 ? "Crewmates win" : "Assassins win",
-      players: game.players
+      players: players
     });
   } else {
     res.json({
       result: "Continue",
-      players: game.players
+      players: updatedGame.players
     });
   }
 }
 
 const castVote = async (req: Request, res: Response) => {
-  const { vote } = req.body;
+  const { gameCode, vote } = req.body;
 
-  const playerID = await redisClient.get(req.cookies["sessionID"]);
-  const game = await GameModel.findOne({ "players.playerID": playerID });
+  const game = await GameModel.findOne({ gameCode: gameCode });
   if (!game) {
     res.json({ error: "Game not found" });
     return;
   }
 
+  const playerID = await redisClient.get(req.cookies["sessionID"]);
   const player = game.players.find((searchPlayer) => searchPlayer.playerID === playerID);
   if (!player) {
     res.json({ error: "Player not found" });
@@ -168,7 +175,7 @@ const castVote = async (req: Request, res: Response) => {
   player.vote = vote;
   await game.save();
 
-  const updatedGame = await GameModel.findOne({ "players.playerID": playerID });
+  const updatedGame = await GameModel.findOne({ gameCode: gameCode });
   if (!updatedGame) {
     res.json({ error: "Game not found" });
     return;
@@ -176,7 +183,7 @@ const castVote = async (req: Request, res: Response) => {
 
   let allVoted = true;
   for (const player of updatedGame.players) {
-    if (player.vote === "") {
+    if (player.status === "alive" && player.vote === "") {
       allVoted = false;
       break;
     }
@@ -196,14 +203,16 @@ const castVote = async (req: Request, res: Response) => {
     }
   }
 
+  let numVotes = 0;
+  for (const value of votes.values()) numVotes += value;
   for (const [key, value] of votes) {
-    if (value > updatedGame.players.length / 2) {
-      const player = updatedGame.players.find(searchPlayer => searchPlayer.playerID === key);
-      if (!player) {
+    if (value > numVotes / 2) {
+      const votedPlayer = updatedGame.players.find(searchPlayer => searchPlayer.playerID === key);
+      if (!votedPlayer) {
         res.json("Player not found");
         return;
       }
-      res.json({ allVoted: true, isAssassin: player.role === "assassin", voteOut: player, players: updatedGame.players });
+      res.json({ allVoted: true, isAssassin: votedPlayer.role === "assassin", voteOut: votedPlayer, players: updatedGame.players });
       return;
     }
   }

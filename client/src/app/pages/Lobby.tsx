@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import axios from "axios";
 import socket from "../socket-io.ts";
 import { useNavigate } from "react-router-dom";
@@ -8,9 +8,7 @@ import useHandleLeaveGame from "../hooks/useHandleLeaveGame.ts"
 
 const Lobby = () => {
   const { setGameState, gameCode, players, locations, numberAssassins, ejectionConfirmation, numberTasks, timeBetweenTasks, townhallTime, screen } = useGameStore();
-  const { setPlayerState, name, position} = usePlayerStore();
-
-  const [role, setRole] = useState("crewmate");
+  const { setPlayerState, name, position, role} = usePlayerStore();
 
   const navigate = useNavigate();
 
@@ -46,9 +44,9 @@ const Lobby = () => {
       setPlayerState({
         playerID: response.data.player.playerID,
         name: response.data.player.name,
+        role: response.data.player.role
       });
       setPlayerState({ position: response.data.player.position });
-      setRole(response.data.player.role);
       // reconnects on refresh; socket.io takes care of the same socket joining the same room twice
       socket.emit("reconnect", {
         gameCode: useGameStore.getState().gameCode,
@@ -88,7 +86,6 @@ const Lobby = () => {
       setPlayerState({
         role: player.role
       });
-      setRole(player.role);
       setGameState({ screen: "roles" });
     })
 

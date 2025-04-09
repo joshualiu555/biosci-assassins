@@ -18,4 +18,4 @@ playersRouter.delete("/removePlayer", removePlayer);
 playersRouter.delete("/removeRedisAndCookie", removeRedisAndCookie);
 playersRouter.get("/checkPlayerExists", checkPlayerExists);
 playersRouter.put("/markDead", markDead);
-playersRouter.post("/castVote", castVote);
+playersRouter.put("/castVote", castVote);

@@ -17,7 +17,6 @@ const Townhall = () => {
 
   useEffect(() => {
     socket.on("allVoted", async ({ voteOut, isAssassin, players }) => {
-      console.log("All voted");
       setVoteOut(voteOut);
       setIsAssassin(isAssassin);
       setGameState({ players: players });
@@ -27,7 +26,9 @@ const Townhall = () => {
         status: "result"
       });
 
-      if (voteOut != null) {
+      setGameState({ screen: "result" });
+
+      if (voteOut !== null) {
         const response = await axios.put("http://localhost:3000/players/markDead",
           {
             gameCode: gameCode,
@@ -38,7 +39,6 @@ const Townhall = () => {
           }
         );
         if (response.data.result !== "Continue") {
-          console.log("Game ended");
           socket.emit("endGame", {
             result: response.data.result,
             players: response.data.players
@@ -46,12 +46,16 @@ const Townhall = () => {
           return;
         }
       }
-
-      setGameState({ screen: "result" });
     })
 
-    socket.on("resumedPlaying", () => {
+    socket.on("resumedPlaying", async () => {
+      await axios.put("http://localhost:3000/games/changeStatus", {
+        gameCode: gameCode,
+        status: "playing"
+      });
       setGameState({ screen: "playing" });
+      setVoteOut(null);
+      setIsAssassin(null);
     });
 
     return () => {
@@ -65,10 +69,13 @@ const Townhall = () => {
 
     setVoted(true);
 
-    const response = await axios.post("http://localhost:3000/players/castVote",
-      { vote: selectedPlayer.playerID },
+    const response = await axios.put("http://localhost:3000/players/castVote",
+      {
+        gameCode: gameCode,
+        vote: selectedPlayer.playerID
+      },
       { withCredentials: true }
-    )
+    );
 
     if (response.data.allVoted) {
       socket.emit("allVoted", {
@@ -84,8 +91,6 @@ const Townhall = () => {
   };
 
   const handleResumeGame = async () => {
-    setVoteOut(null);
-    setIsAssassin(null);
     await axios.put("http://localhost:3000/games/resetVotes", {
       gameCode: gameCode
     })
