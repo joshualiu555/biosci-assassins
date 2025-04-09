@@ -190,7 +190,9 @@ const castVote = async (req: Request, res: Response) => {
   let votes = new Map();
   if (allVoted) {
     for (const player of updatedGame.players) {
-      votes.set(player.vote, (votes.get(player.id) || 0) + 1);
+      if (player.vote) {
+        votes.set(player.vote, (votes.get(player.vote) || 0) + 1);
+      }
     }
   }
 

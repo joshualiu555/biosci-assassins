@@ -97,6 +97,20 @@ const completeTask = async (req: Request, res: Response) => {
   });
 }
 
+const resetVotes = async (req: Request, res: Response) => {
+  const { gameCode } = req.body;
+  const game = await GameModel.findOne({ gameCode: gameCode });
+  if (!game) {
+    res.json({ error: "Game not found" });
+    return;
+  }
+
+  for (const player of game.players) player.vote = "";
+
+  await game.save();
+  res.json();
+}
+
 export {
   getGame,
   createGame,
@@ -105,5 +119,6 @@ export {
   validCode,
   assignRoles,
   changeStatus,
-  completeTask
+  completeTask,
+  resetVotes
 }

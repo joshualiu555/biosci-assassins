@@ -8,31 +8,16 @@ import { Player } from "../types.ts";
 
 const Townhall = () => {
   const [voted, setVoted] = useState(false);
-  const [status, setStatus] = useState("");
   const [selectedPlayer, setSelectedPlayer] = useState<Player>();
   const [voteOut, setVoteOut] = useSessionStorage<Player | null>("vote-out", null);
   const [isAssassin, setIsAssassin] = useSessionStorage("is-assassin", null);
 
   const { setGameState, gameCode, players, screen, ejectionConfirmation} = useGameStore();
-  const { position } = usePlayerStore();
+  const { position, status } = usePlayerStore();
 
   useEffect(() => {
-    const fetchPlayer = async () => {
-      const response = await axios.get("http://localhost:3000/players/getPlayer", {
-        withCredentials: true
-      });
-      setStatus(response.data.player.status);
-    }
-    fetchPlayer()
-      .then(() => {
-        console.log("Player fetched");
-      })
-      .catch(() => {
-        console.error("Failed to fetch player");
-      });
-
     socket.on("allVoted", async ({ voteOut, isAssassin, players }) => {
-      console.log("All Voted");
+      console.log("All voted");
       setVoteOut(voteOut);
       setIsAssassin(isAssassin);
       setGameState({ players: players });
@@ -53,14 +38,15 @@ const Townhall = () => {
           }
         );
         if (response.data.result !== "Continue") {
+          console.log("Game ended");
           socket.emit("endGame", {
             result: response.data.result,
             players: response.data.players
           });
+          return;
         }
       }
 
-      console.log("Result");
       setGameState({ screen: "result" });
     })
 
@@ -80,7 +66,7 @@ const Townhall = () => {
     setVoted(true);
 
     const response = await axios.post("http://localhost:3000/players/castVote",
-      { playerID: selectedPlayer.playerID },
+      { vote: selectedPlayer.playerID },
       { withCredentials: true }
     )
 
@@ -100,6 +86,13 @@ const Townhall = () => {
   const handleResumeGame = async () => {
     setVoteOut(null);
     setIsAssassin(null);
+    await axios.put("http://localhost:3000/games/resetVotes", {
+      gameCode: gameCode
+    })
+    await axios.put("http://localhost:3000/games/changeStatus", {
+      gameCode: gameCode,
+      status: "playing"
+    });
     socket.emit("resumePlaying");
   }
 

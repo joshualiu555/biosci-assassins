@@ -6,6 +6,7 @@ interface PlayerStore {
   name: string;
   position: string
   role: string;
+  status: string;
 
   setPlayerState: (updates: Partial<PlayerStore>) => void;
   resetPlayerState: () => void;
@@ -15,7 +16,8 @@ const initialPlayerState = {
   playerID: "",
   name: "",
   position: "",
-  role: ""
+  role: "",
+  status: ""
 };
 
 const usePlayerStore = create<PlayerStore>()(

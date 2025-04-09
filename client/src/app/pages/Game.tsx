@@ -10,11 +10,10 @@ import Townhall from "../components/Townhall.tsx";
 
 const Game = () => {
   const { setGameState, resetGameState, gameCode, players, numberTasks, screen } = useGameStore();
-  const { setPlayerState, resetPlayerState, playerID, role } = usePlayerStore();
+  const { setPlayerState, resetPlayerState, playerID, position, role, status } = usePlayerStore();
 
   const [doingTask, setDoingTask] = useState(false);
   const [tasksRemaining, setTasksRemaining] = useState(numberTasks);
-  const [status, setStatus] = useState("alive");
 
   const navigate = useNavigate();
 
@@ -41,8 +40,10 @@ const Game = () => {
       const response = await axios.get("http://localhost:3000/players/getPlayer", {
         withCredentials: true
       });
-      setPlayerState({ position: response.data.player.position });
-      setStatus(response.data.player.status);
+      setPlayerState({
+        position: response.data.player.position,
+        status: response.data.player.status
+      });
     }
     fetchPlayer()
       .then(() => {
@@ -67,7 +68,7 @@ const Game = () => {
     socket.on("switchedAdmin", (updatedPlayers) => {
       setGameState({ players: updatedPlayers });
       for (const player of updatedPlayers) {
-        if (player.position === "admin" && player.playerID === usePlayerStore.getState().playerID) {
+        if (position === "admin" && player.playerID === usePlayerStore.getState().playerID) {
           setPlayerState({ position: "admin" });
           break;
         }
@@ -109,7 +110,7 @@ const Game = () => {
         withCredentials: true
       }
     );
-    setStatus("dead");
+    setPlayerState({ status: "dead" });
     if (response.data.result !== "Continue") {
       socket.emit("endGame", {
         result: response.data.result,
