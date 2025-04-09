@@ -4,12 +4,12 @@ import socket from "../socket-io.ts";
 import { useNavigate } from "react-router-dom";
 import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
+import useHandleLeaveGame from "../hooks/useHandleLeaveGame.ts"
 
 const Lobby = () => {
-  const { setGameState, resetGameState, gameCode, players, locations, numberAssassins, ejectionConfirmation, numberTasks, timeBetweenTasks, townhallTime, screen } = useGameStore();
-  const { setPlayerState, resetPlayerState, name} = usePlayerStore();
+  const { setGameState, gameCode, players, locations, numberAssassins, ejectionConfirmation, numberTasks, timeBetweenTasks, townhallTime, screen } = useGameStore();
+  const { setPlayerState, name, position} = usePlayerStore();
 
-  const [position, setPosition] = useState("");
   const [role, setRole] = useState("crewmate");
 
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ const Lobby = () => {
         playerID: response.data.player.playerID,
         name: response.data.player.name,
       });
-      setPosition(response.data.player.position);
+      setPlayerState({ position: response.data.player.position });
       setRole(response.data.player.role);
       // reconnects on refresh; socket.io takes care of the same socket joining the same room twice
       socket.emit("reconnect", {
@@ -76,7 +76,7 @@ const Lobby = () => {
       setGameState({ players: updatedPlayers });
       for (const player of updatedPlayers) {
         if (player.position === "admin" && player.playerID === usePlayerStore.getState().playerID) {
-          setPosition("admin")
+          setPlayerState({ position: "admin" });
           break;
         }
       }
@@ -105,25 +105,7 @@ const Lobby = () => {
     };
   }, []);
 
-  const handleLeaveGame = async () => {
-    const response = await axios.delete("http://localhost:3000/players/removePlayer", {
-      withCredentials: true,
-    });
-
-    socket.emit("removePlayer");
-
-    if (response.data.switchAdmin === true) {
-      socket.emit("switchAdmin", response.data.updatedPlayers);
-    }
-
-    resetGameState();
-    resetPlayerState();
-    sessionStorage.removeItem("screen");
-    sessionStorage.removeItem("game-storage");
-    sessionStorage.removeItem("player-storage");
-
-    navigate("/");
-  };
+  const handleLeaveGame = useHandleLeaveGame();
 
   const handleAssignRoles = async () => {
     // TODO - Uncomment in production

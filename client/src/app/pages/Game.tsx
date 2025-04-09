@@ -4,12 +4,13 @@ import socket from "../socket-io.ts";
 import { useNavigate } from "react-router-dom";
 import useGameStore from "../zustand/gameStore.ts";
 import usePlayerStore from "../zustand/playerStore.ts";
+import useHandleLeaveGame from "../hooks/useHandleLeaveGame.ts"
 import Task from "../components/Task.tsx"
 import Townhall from "../components/Townhall.tsx";
 
 const Game = () => {
   const { setGameState, resetGameState, gameCode, players, numberTasks, screen } = useGameStore();
-  const { resetPlayerState, playerID, role } = usePlayerStore();
+  const { setPlayerState, resetPlayerState, playerID, role } = usePlayerStore();
 
   const [doingTask, setDoingTask] = useState(false);
   const [tasksRemaining, setTasksRemaining] = useState(numberTasks);
@@ -40,6 +41,7 @@ const Game = () => {
       const response = await axios.get("http://localhost:3000/players/getPlayer", {
         withCredentials: true
       });
+      setPlayerState({ position: response.data.player.position });
       setStatus(response.data.player.status);
     }
     fetchPlayer()
@@ -54,8 +56,22 @@ const Game = () => {
       setTasksRemaining(remaining);
     })
 
+    socket.on("startedTownhall", () => {
+      setGameState({ screen: "voting" });
+    })
+
     socket.on("removedPlayer", playerID => {
       setGameState({ players: players.filter((player) => player.playerID !== playerID) });
+    });
+
+    socket.on("switchedAdmin", (updatedPlayers) => {
+      setGameState({ players: updatedPlayers });
+      for (const player of updatedPlayers) {
+        if (player.position === "admin" && player.playerID === usePlayerStore.getState().playerID) {
+          setPlayerState({ position: "admin" });
+          break;
+        }
+      }
     });
 
     socket.on("endedGame", async data => {
@@ -67,30 +83,21 @@ const Game = () => {
       sessionStorage.removeItem("screen");
       sessionStorage.removeItem("game-storage");
       sessionStorage.removeItem("player-storage");
+      sessionStorage.removeItem("vote-out");
+      sessionStorage.removeItem("is-assassin");
       navigate('/finished', { state: { data: data } });
     })
 
     return () => {
+      socket.off("completedTask");
+      socket.off("startedTownhall");
       socket.off("removedPlayer");
+      socket.off("switchedAdmin");
       socket.off("endedGame");
     };
   }, [])
 
-  const handleLeaveGame = async () => {
-    await axios.delete("http://localhost:3000/players/removePlayer", {
-      withCredentials: true,
-    });
-
-    socket.emit("removePlayer");
-
-    resetGameState();
-    resetPlayerState();
-    sessionStorage.removeItem("screen");
-    sessionStorage.removeItem("game-storage");
-    sessionStorage.removeItem("player-storage");
-
-    navigate("/");
-  };
+  const handleLeaveGame = useHandleLeaveGame();
 
   const handleMarkDead = async () => {
     const response = await axios.put("http://localhost:3000/players/markDead",
@@ -116,7 +123,8 @@ const Game = () => {
       gameCode: gameCode,
       status: "voting"
     });
-    setGameState({ screen: "voting" });
+
+    socket.emit("startTownhall");
   }
 
   const handleCompleteTask = async () => {
@@ -143,22 +151,22 @@ const Game = () => {
     <div>
       {status === "alive" && <button onClick={handleMarkDead}>Mark yourself dead</button>}
       <button onClick={handleLeaveGame}>Leave game</button>
-      <button onClick={handleCallTownhall}>Call townhall</button>
+      {screen != "voting" && screen != "result" && <button onClick={handleCallTownhall}>Call townhall</button>}
       <p>{tasksRemaining}</p>
 
-      {!doingTask && screen != "voting" && (
+      {!doingTask && screen != "voting" && screen != "result" && (
         <button onClick={() => {setDoingTask(true)}}>
           Start task
         </button>
       )}
-      {doingTask && screen != "voting" && (
+      {doingTask && screen != "voting" && screen != "result" && (
         <div>
           <button onClick={handleCompleteTask}>Complete task</button>
           <Task />
         </div>
       )}
 
-      {screen === "voting" && (
+      {(screen === "voting" || screen === "result") && (
         <Townhall />
       )}
 

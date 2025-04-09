@@ -4,6 +4,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 interface PlayerStore {
   playerID: string;
   name: string;
+  position: string
   role: string;
 
   setPlayerState: (updates: Partial<PlayerStore>) => void;
@@ -13,6 +14,7 @@ interface PlayerStore {
 const initialPlayerState = {
   playerID: "",
   name: "",
+  position: "",
   role: ""
 };
 

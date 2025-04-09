@@ -182,7 +182,10 @@ const castVote = async (req: Request, res: Response) => {
     }
   }
 
-  if (!allVoted) res.json({ allVoted: false, isAssassin: null, voteOut: null, players: updatedGame.players });
+  if (!allVoted) {
+    res.json({ allVoted: false, isAssassin: null, voteOut: null, players: updatedGame.players });
+    return;
+  }
 
   let votes = new Map();
   if (allVoted) {
@@ -198,7 +201,8 @@ const castVote = async (req: Request, res: Response) => {
         res.json("Player not found");
         return;
       }
-      res.json({ allVoted: true, isAssassin: player.role === "assassin", voteOut: key, players: updatedGame.players });
+      res.json({ allVoted: true, isAssassin: player.role === "assassin", voteOut: player, players: updatedGame.players });
+      return;
     }
   }
 
