@@ -152,7 +152,7 @@ const Game = () => {
     <div>
       {status === "alive" && <button onClick={handleMarkDead}>Mark yourself dead</button>}
       <button onClick={handleLeaveGame}>Leave game</button>
-      {screen != "voting" && screen != "result" && <button onClick={handleCallTownhall}>Call townhall</button>}
+      {status === "alive" && screen != "voting" && screen != "result" && <button onClick={handleCallTownhall}>Call townhall</button>}
       <p>{tasksRemaining}</p>
 
       {!doingTask && screen != "voting" && screen != "result" && (

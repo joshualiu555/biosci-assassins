@@ -13,9 +13,15 @@ const Townhall = () => {
   const [isAssassin, setIsAssassin] = useSessionStorage("is-assassin", null);
 
   const { setGameState, gameCode, players, screen, ejectionConfirmation} = useGameStore();
-  const { position, status } = usePlayerStore();
+  const { setPlayerState, playerID, position, status } = usePlayerStore();
 
   useEffect(() => {
+    socket.on("markedDead", deadPlayerID => {
+      if (deadPlayerID === playerID) {
+        setPlayerState({ status: "dead" });
+      }
+    })
+
     socket.on("allVoted", async ({ voteOut, isAssassin, players }) => {
       setVoteOut(voteOut);
       setIsAssassin(isAssassin);
@@ -38,12 +44,13 @@ const Townhall = () => {
             withCredentials: true
           }
         );
+        socket.emit("markDead", voteOut.playerID);
+
         if (response.data.result !== "Continue") {
           socket.emit("endGame", {
             result: response.data.result,
             players: response.data.players
           });
-          return;
         }
       }
     })

@@ -87,10 +87,16 @@ const removePlayer = async (req: Request, res: Response) => {
 }
 
 const removeRedisAndCookie = async (req: Request, res: Response) => {
-  await redisClient.del(req.cookies["sessionID"]);
-  res.clearCookie("sessionID");
-
-  res.json();
+  try {
+    const sessionID = req.cookies["sessionID"];
+    if (sessionID) {
+      await redisClient.del(sessionID);
+      res.clearCookie("sessionID");
+    }
+    res.json({ success: true });
+  } catch (error) {
+    res.json({ success: false });
+  }
 }
 
 const checkPlayerExists = async (req: Request, res: Response) => {
