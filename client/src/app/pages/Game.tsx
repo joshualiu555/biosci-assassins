@@ -76,7 +76,7 @@ const Game = () => {
     });
 
     socket.on("endedGame", async data => {
-      await axios.delete("https://biosci-assassins-f380214977c5.herokuapp.com/removeRedisAndCookie", {
+      await axios.delete("https://biosci-assassins-f380214977c5.herokuapp.com/players/removeRedisAndCookie", {
         withCredentials: true
       });
       resetGameState();
