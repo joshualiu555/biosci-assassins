@@ -42,6 +42,12 @@ const onConnection = (socket: Socket) => {
 }
 io.on("connection", onConnection);
 
+app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '..', 'client', 'dist', 'index.html'));
+});
+
 httpServer.listen(process.env.PORT, () => {
   console.log("Server started")
 });
