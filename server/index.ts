@@ -61,7 +61,9 @@ mongoose
     console.log(error);
   });
 
-const redisClient = createClient();
+const redisClient = createClient({
+  url: process.env.REDISCLOUD_URL,
+});
 redisClient.connect()
   .then(() => {
     console.log("Redis connected");
