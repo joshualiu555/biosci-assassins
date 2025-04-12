@@ -129,7 +129,7 @@ const Game = () => {
   }
 
   const handleCompleteTask = async () => {
-    const response = await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/completeTask",
+    const response = await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/games/completeTask",
       {
         gameCode: gameCode,
         role: role
