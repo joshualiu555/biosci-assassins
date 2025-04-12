@@ -3,7 +3,13 @@
     "install:client": "cd client && npm install",
     "install:server": "cd server && npm install",
     "build:client": "cd client && npm run build",
-    "start:server": "cd server && node index.ts",
-    "start": "npm run build:client && npm run start:server"
+    "build:server": "cd server && npm run build",
+    "start:server": "cd server && npm start",
+    "postinstall": "npm run install:client && npm run install:server",
+    "heroku-postbuild": "npm run build:client && npm run build:server",
+    "start": "npm run start:server"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
