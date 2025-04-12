@@ -7,14 +7,14 @@ import usePlayerStore from "../zustand/playerStore.ts";
 import useHandleLeaveGame from "../hooks/useHandleLeaveGame.ts"
 
 const Lobby = () => {
-  const { setGameState, gameCode, players, locations, numberAssassins, ejectionConfirmation, numberTasks, timeBetweenTasks, townhallTime, screen } = useGameStore();
+  const { setGameState, gameCode, players, locations, numberAssassins, ejectionConfirmation, numberTasks, screen } = useGameStore();
   const { setPlayerState, name, position, role} = usePlayerStore();
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchGame = async () => {
-      const response = await axios.get("http://localhost:3000/games/getGame", {
+      const response = await axios.get("https://biosci-assassins-f380214977c5.herokuapp.com/games/getGame", {
         withCredentials: true
       });
       setGameState({
@@ -38,7 +38,7 @@ const Lobby = () => {
       });
 
     const fetchPlayer = async () => {
-      const response = await axios.get("http://localhost:3000/players/getPlayer", {
+      const response = await axios.get("https://biosci-assassins-f380214977c5.herokuapp.com/players/getPlayer", {
         withCredentials: true
       });
       setPlayerState({
@@ -105,18 +105,17 @@ const Lobby = () => {
   const handleLeaveGame = useHandleLeaveGame();
 
   const handleAssignRoles = async () => {
-    // TODO - Uncomment in production
-    // if (players.length < 2 * numberAssassins + 1) {
-    //   alert(`Must have at least ${2 * numberAssassins + 1} players`);
-    //   return;
-    // }
+    if (players.length < 2 * numberAssassins + 1) {
+      alert(`Must have at least ${2 * numberAssassins + 1} players`);
+      return;
+    }
 
-    await axios.put("http://localhost:3000/games/changeStatus", {
+    await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/games/changeStatus", {
       gameCode: gameCode,
       status: "roles"
     })
 
-    const response = await axios.put("http://localhost:3000/games/assignRoles",
+    const response = await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/games/assignRoles",
       {
         gameCode: gameCode,
         numberAssassins: numberAssassins,
@@ -131,7 +130,7 @@ const Lobby = () => {
   }
 
   const handleStartGame = async () => {
-    await axios.put("http://localhost:3000/games/changeStatus", {
+    await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/games/changeStatus", {
       gameCode: gameCode,
       status: "playing"
     })
@@ -144,13 +143,11 @@ const Lobby = () => {
         <div>
           <button onClick={handleLeaveGame}>Leave game</button>
           <div>
-            <p>Game code: {gameCode}</p>
-            <p>You: {name}</p>
-            <p>Number assassins: {numberAssassins}</p>
-            <p>Ejection Confirmation: {ejectionConfirmation ? "on" : "off"}</p>
-            <p>Number tasks: {numberTasks}</p>
-            <p>Time between tasks: {timeBetweenTasks} minutes</p>
-            <p>Townhall time: {townhallTime} minutes</p>
+            <h3>Game code: {gameCode}</h3>
+            <h3>You: {name}</h3>
+            <h3>Number assassins: {numberAssassins}</h3>
+            <h3>Ejection Confirmation: {ejectionConfirmation ? "On" : "Off"}</h3>
+            <h3>Number tasks: {numberTasks}</h3>
             <h3>Locations:</h3>
             {locations.length > 0 ? (
               locations.map((location, index) => <p key={index}>{location}</p>)
@@ -170,18 +167,18 @@ const Lobby = () => {
             {position === "admin" ? (
               <button onClick={handleAssignRoles}>Assign Roles</button>
             ) : (
-              <p>Waiting for admin to assign roles</p>
+              <h2>Waiting for admin to assign roles...</h2>
             )}
           </div>
         </div>
       ) :
         <div>
-          <h2>{role}</h2>
+          <h1>{role}</h1>
           <div>
             {position === "admin" ? (
               <button onClick={handleStartGame}>Start game</button>
             ) : (
-              <p>Waiting for admin to start game</p>
+              <h2>Waiting for admin to start game</h2>
             )}
           </div>
         </div>

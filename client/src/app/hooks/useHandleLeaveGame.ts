@@ -10,7 +10,7 @@ const useHandleLeaveGame = () => {
   const navigate = useNavigate();
 
   return async () => {
-    const response = await axios.delete("http://localhost:3000/players/removePlayer", {
+    const response = await axios.delete("https://biosci-assassins-f380214977c5.herokuapp.com/players/removePlayer", {
       withCredentials: true,
     });
 

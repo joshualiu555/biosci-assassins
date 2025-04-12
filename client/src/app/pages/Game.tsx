@@ -19,7 +19,7 @@ const Game = () => {
 
   useEffect(() => {
     const fetchGame = async () => {
-      const response = await axios.get("http://localhost:3000/games/getGame", {
+      const response = await axios.get("https://biosci-assassins-f380214977c5.herokuapp.com/games/getGame", {
         withCredentials: true
       });
       setTasksRemaining(response.data.game.numberTasks);
@@ -37,7 +37,7 @@ const Game = () => {
       });
 
     const fetchPlayer = async () => {
-      const response = await axios.get("http://localhost:3000/players/getPlayer", {
+      const response = await axios.get("https://biosci-assassins-f380214977c5.herokuapp.com/players/getPlayer", {
         withCredentials: true
       });
       setPlayerState({
@@ -76,7 +76,7 @@ const Game = () => {
     });
 
     socket.on("endedGame", async data => {
-      await axios.delete("http://localhost:3000/players/removeRedisAndCookie", {
+      await axios.delete("https://biosci-assassins-f380214977c5.herokuapp.com/removeRedisAndCookie", {
         withCredentials: true
       });
       resetGameState();
@@ -101,7 +101,7 @@ const Game = () => {
   const handleLeaveGame = useHandleLeaveGame();
 
   const handleMarkDead = async () => {
-    const response = await axios.put("http://localhost:3000/players/markDead",
+    const response = await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/players/markDead",
       {
         gameCode: gameCode,
         playerID: playerID
@@ -120,7 +120,7 @@ const Game = () => {
   }
 
   const handleCallTownhall = async () => {
-    await axios.put("http://localhost:3000/games/changeStatus", {
+    await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/games/changeStatus", {
       gameCode: gameCode,
       status: "voting"
     });
@@ -129,7 +129,7 @@ const Game = () => {
   }
 
   const handleCompleteTask = async () => {
-    const response = await axios.put("http://localhost:3000/games/completeTask",
+    const response = await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/completeTask",
       {
         gameCode: gameCode,
         role: role
@@ -150,10 +150,15 @@ const Game = () => {
 
   return (
     <div>
-      {status === "alive" && <button onClick={handleMarkDead}>Mark yourself dead</button>}
       <button onClick={handleLeaveGame}>Leave game</button>
+      <br/>
+      {status === "alive" && <button onClick={handleMarkDead}>Mark yourself dead</button>}
+      <br/>
       {status === "alive" && screen != "voting" && screen != "result" && <button onClick={handleCallTownhall}>Call townhall</button>}
-      <p>{tasksRemaining}</p>
+      <br/>
+
+      <h3>Tasks Remaining: {tasksRemaining}</h3>
+      <h3>{status}</h3>
 
       {!doingTask && screen != "voting" && screen != "result" && (
         <button onClick={() => {setDoingTask(true)}}>
@@ -170,10 +175,6 @@ const Game = () => {
       {(screen === "voting" || screen === "result") && (
         <Townhall />
       )}
-
-      <p>Click the back button to leave the game</p>
-      <p>{status}</p>
-      <p>{screen}</p>
     </div>
   );
 };

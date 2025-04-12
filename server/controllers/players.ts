@@ -38,8 +38,8 @@ const addPlayer = async (req: Request, res: Response) => {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       sameSite: "strict",
-      // TODO - Uncomment in production when you use https
-      // secure: true
+      // Uncomment in production
+      secure: true
     });
 
     await redisClient.set(sessionID, player.playerID);

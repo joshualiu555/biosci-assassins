@@ -18,7 +18,7 @@ const app = express();
 app.use(express.json());
 const corsOptions = {
   // TODO - Use environment variable
-  origin: "http://localhost:5173",
+  origin: process.env.CORS_ORIGIN || "http://localhost:5173",
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -31,7 +31,7 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     // TODO - Use environment variable
-    origin: "http://localhost:5173",
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
     credentials: true
   }
 });

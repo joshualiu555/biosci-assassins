@@ -6,8 +6,8 @@ const Finished = () => {
 
   return (
     <div>
-      <p>{state.data.result}</p>
-      <p>Assassins:</p>
+      <h1>{state.data.result}</h1>
+      <h2>Assassins:</h2>
       {state.data.players.map((player: {
         playerID: string,
         name: string,

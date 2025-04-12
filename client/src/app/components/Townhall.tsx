@@ -27,7 +27,7 @@ const Townhall = () => {
       setIsAssassin(isAssassin);
       setGameState({ players: players });
 
-      await axios.put("http://localhost:3000/games/changeStatus", {
+      await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/games/changeStatus", {
         gameCode: gameCode,
         status: "result"
       });
@@ -35,7 +35,7 @@ const Townhall = () => {
       setGameState({ screen: "result" });
 
       if (voteOut !== null) {
-        const response = await axios.put("http://localhost:3000/players/markDead",
+        const response = await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/players/markDead",
           {
             gameCode: gameCode,
             playerID: voteOut.playerID
@@ -56,7 +56,7 @@ const Townhall = () => {
     })
 
     socket.on("resumedPlaying", async () => {
-      await axios.put("http://localhost:3000/games/changeStatus", {
+      await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/games/changeStatus", {
         gameCode: gameCode,
         status: "playing"
       });
@@ -76,7 +76,7 @@ const Townhall = () => {
 
     setVoted(true);
 
-    const response = await axios.put("http://localhost:3000/players/castVote",
+    const response = await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/players/castVote",
       {
         gameCode: gameCode,
         vote: selectedPlayer.playerID
@@ -98,10 +98,10 @@ const Townhall = () => {
   };
 
   const handleResumeGame = async () => {
-    await axios.put("http://localhost:3000/games/resetVotes", {
+    await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/games/resetVotes", {
       gameCode: gameCode
     })
-    await axios.put("http://localhost:3000/games/changeStatus", {
+    await axios.put("https://biosci-assassins-f380214977c5.herokuapp.com/games/changeStatus", {
       gameCode: gameCode,
       status: "playing"
     });

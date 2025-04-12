@@ -3,6 +3,8 @@ import usePlayerStore from "../zustand/playerStore.ts";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import socket from "../socket-io.ts";
+import "../../styles/Home.css";
+import RoundtableLogo from "../../assets/RoundtableLogo.png";
 
 function Home() {
   const [nameInput, setNameInput] = useState("");
@@ -44,7 +46,7 @@ function Home() {
       alert("Name cannot be empty");
       return;
     }
-    const playerExists = await axios.get("http://localhost:3000/players/checkPlayerExists", {
+    const playerExists = await axios.get("https://biosci-assassins-f380214977c5.herokuapp.com/checkPlayerExists", {
       params: {
         gameCode: gameCode,
         playerName: nameInput
@@ -55,7 +57,7 @@ function Home() {
       return;
     }
 
-    const gameExists = await axios.get("http://localhost:3000/games/validCode", {
+    const gameExists = await axios.get("https://biosci-assassins-f380214977c5.herokuapp.com/games/validCode", {
       params: {
         gameCode: gameCode
       }
@@ -71,7 +73,7 @@ function Home() {
         vote: ""
       };
 
-      const response = await axios.post("http://localhost:3000/players/addPlayer",
+      const response = await axios.post("https://biosci-assassins-f380214977c5.herokuapp.com/players/addPlayer",
         {
           gameCode: gameCode,
           player: player
@@ -98,41 +100,32 @@ function Home() {
   };
 
   const handleCreateGame = async () => {
-    // TODO - Uncomment in production
-    // if (numberLocations < 1) {
-    //   alert("Must have at least 1 location");
-    //   return;
-    // }
-    //
-    // for (const location of locationInputs) {
-    //   if (location === "") {
-    //     alert("Locations cannot be empty");
-    //     return;
-    //   }
-    // }
-    //
-    // if (numberAssassins < 1) {
-    //   alert("Must have at least 1 assassin");
-    //   return;
-    // }
-    // if (numberTasks < 1) {
-    //   alert("Must have at least 1 task");
-    //   return;
-    // }
-    // if (timeBetweenTasks < 1) {
-    //   alert("Must have at least 1 minute between tasks");
-    //   return;
-    // }
-    // if (townhallTime < 1) {
-    //   alert("Must have at least 1 minute of townhall time");
-    //   return;
-    // }
+    if (numberLocations < 1) {
+      alert("Must have at least 1 location");
+      return;
+    }
+
+    for (const location of locationInputs) {
+      if (location === "") {
+        alert("Locations cannot be empty");
+        return;
+      }
+    }
+
+    if (numberAssassins < 1) {
+      alert("Must have at least 1 assassin");
+      return;
+    }
+    if (numberTasks < 1) {
+      alert("Must have at least 1 task");
+      return;
+    }
 
     let generatedGameCode;
     let isDuplicate = true;
     while (isDuplicate) {
       generatedGameCode = Math.floor(1000 + Math.random() * 9000).toString();
-      const response = await axios.get("http://localhost:3000/games/gameExists", {
+      const response = await axios.get("https://biosci-assassins-f380214977c5.herokuapp.com/games/gameExists", {
         params: {
           gameCode: generatedGameCode
         }
@@ -150,14 +143,18 @@ function Home() {
       numberTasks: numberTasks,
       tasksRemaining: numberTasks
     };
-    await axios.post("http://localhost:3000/games/createGame", game);
+    await axios.post("https://biosci-assassins-f380214977c5.herokuapp.com/games/createGame", game);
 
     await handleJoinGame(generatedGameCode as string, "admin");
   };
 
   return (
-    <div>
-      <p>Name:</p>
+    <div className="homeContainer">
+      <h1>Roundtable Bio-Sci Assassins</h1>
+
+      <img src={RoundtableLogo} alt="Roundtable Logo"/>
+
+      <h3>Name:</h3>
       <input
         type="text"
         value={nameInput}
@@ -165,7 +162,7 @@ function Home() {
         placeholder="Enter name"
       />
 
-      <p>Code:</p>
+      <h3>Code:</h3>
       <input
         type="text"
         inputMode="numeric"
@@ -174,11 +171,13 @@ function Home() {
         placeholder="Enter code"
       />
 
+      <br/>
+
       <button onClick={() => handleJoinGame(gameCodeInput, "non-admin")}>
         Join Game
       </button>
 
-      <p>Number of Assassins:</p>
+      <h3>Number of Assassins:</h3>
       <input
         type="text"
         inputMode="numeric"
@@ -186,16 +185,16 @@ function Home() {
         onChange={handleAssassinsChange}
       />
 
-      <p>
+      <h3>
         <input
           type="checkbox"
           checked={ejectionConfirmation}
           onChange={handleEjectionConfirmationChange}
         />
         Ejection Confirmation
-      </p>
+      </h3>
 
-      <p>Number of Tasks:</p>
+      <h3>Number of Tasks:</h3>
       <input
         type="text"
         inputMode="numeric"
@@ -203,7 +202,7 @@ function Home() {
         onChange={handleTasksChange}
       />
 
-      <p>Number Locations: {numberLocations}</p>
+      <h3>Number Locations: {numberLocations}</h3>
       <input
         type="text"
         inputMode="numeric"
@@ -221,6 +220,8 @@ function Home() {
           />
         </div>
       ))}
+
+      <br/>
 
       <button onClick={handleCreateGame}>
         Create Game
