@@ -1,7 +1,5 @@
 [Link To Website](https://biosci-assassins-f380214977c5.herokuapp.com)
 
-<img width="450" alt="Screenshot 2025-06-03 at 11 25 04 PM" src="https://github.com/user-attachments/assets/2b624520-e347-4a61-8907-232150643d06" />
-
 ### Steps To Play
 1. Create a game room or join one with a code.
 2. Wait for the admin to assign roles.
